@@ -1,0 +1,117 @@
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --navy: #0a1628;
+    --blue: #1a3a6e;
+    --gold: #c9a84c;
+    --gold-light: #e8c97a;
+    --cream: #f5f0e8;
+    --white: #ffffff;
+    --gray: #8a8f9e;
+    --light: #f9f7f3;
+  }  
+  
+  /* ─── NAV ─── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0;
+    padding: 0 56px;
+    height: 72px;
+    display: flex; align-items: center; justify-content: space-between;
+    z-index: 1000;
+    transition: all 0.3s;
+  }
+  nav.scrolled {
+    background: rgba(10,22,40,0.95);
+    backdrop-filter: blur(16px);
+    box-shadow: 0 2px 24px rgba(0,0,0,0.3);
+  }
+
+  .brand {
+    display: flex; align-items: center; gap: 12px;
+    text-decoration: none;
+  }
+  .brand-logo {
+    width: 130px; 
+    height: 50px;
+    background: var(--white);
+    border-radius: 6px;
+    display: flex; 
+    align-items: center; 
+    justify-content: center;
+  }
+  .brand-logo img{
+    height: 40px;
+    width: auto;
+  }
+
+  .brand-tagline {
+    font-size: 0.7rem;
+    color: var(--gold);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+
+
+  .brand-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+    font-weight: 900;
+    color: var(--navy);
+    letter-spacing: 3px;
+  }
+
+
+  .nav-links {
+    display: flex; align-items: center; gap: 32px;
+    list-style: none;
+  }
+  .nav-links a {
+    font-size: 0.85rem; 
+    color: rgba(255,255,255,0.75);
+    text-decoration: none;
+    letter-spacing: 0.5px;
+    transition: color 0.2s;
+  }
+  .nav-links a.active {
+    border-bottom: 2px solid rgba(255,255,255,0.75);
+    transition: color 0.2s;
+
+  }
+  .nav-links a.active:hover {
+    border-bottom: 2px solid var(--gold);
+  }
+
+  .nav-links a:hover { 
+    color: var(--gold); 
+}
+
+  .nav-actions { 
+    display: flex; align-items: center; gap: 12px; 
+}
+
+  .btn-nav-outline {
+    padding: 8px 20px;
+    border: 1px solid rgba(255,255,255,0.3);
+    border-radius: 6px;
+    color: rgba(255,255,255,0.85);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.82rem; 
+    letter-spacing: 0.5px;
+    cursor: pointer; 
+    background: transparent;
+    text-decoration: none;
+    transition: all 0.2s;
+  }
+  .btn-nav-outline:hover { border-color: var(--gold); color: var(--gold); }
+
+  .btn-nav-fill {
+    padding: 8px 22px;
+    background: var(--gold);
+    border: none; border-radius: 6px;
+    color: var(--navy);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.82rem; font-weight: 600; letter-spacing: 0.5px;
+    cursor: pointer; text-decoration: none;
+    transition: all 0.2s;
+  }
+  .btn-nav-fill:hover { background: var(--gold-light); }
