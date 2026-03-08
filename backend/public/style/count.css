@@ -1,0 +1,795 @@
+
+/* ════════════════════════════════════════════════
+   count.css  —  Styles de la page "Mon Compte"
+   Dépend de header.css (reset, variables, nav, brand)
+════════════════════════════════════════════════ */
+
+@import url('header.css');
+
+
+/* ─── BASE ─── */
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--light);
+  color: var(--navy);
+  min-height: 100vh;
+}
+
+
+/* ════════════════════════════════════════════════
+   TOPBAR
+   Override de .topbar (header.css) :
+   hauteur 72px et padding plus large pour cette page
+════════════════════════════════════════════════ */
+
+.topbar {
+  padding: 0 56px;
+  height: 72px;
+}
+
+/* Lien actif : or sans soulignement */
+.nav-links a.active {
+  color: var(--gold);
+  border-bottom: none;
+}
+
+
+/* ════════════════════════════════════════════════
+   BANDEAU HERO
+   Dégradé navy → blue avec grille dorée décorative
+════════════════════════════════════════════════ */
+
+.page-band {
+  background: linear-gradient(135deg, var(--navy) 0%, var(--blue) 100%);
+  padding: 52px 56px 80px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Grille décorative en arrière-plan */
+.page-band::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(201, 168, 76, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(201, 168, 76, 0.04) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+
+.page-band-inner {
+  position: relative;
+  z-index: 2;
+}
+
+.page-eyebrow {
+  font-size: 0.68rem;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--gold);
+  font-weight: 500;
+  margin-bottom: 10px;
+}
+
+.page-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: var(--white);
+}
+
+
+/* ════════════════════════════════════════════════
+   CONTENU PRINCIPAL
+   Remonte sur le bandeau hero via translateY négatif
+════════════════════════════════════════════════ */
+
+.page-content {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 40px 80px;
+  transform: translateY(-44px);
+}
+
+
+/* ════════════════════════════════════════════════
+   CARTE DE PROFIL
+════════════════════════════════════════════════ */
+
+.profile-card {
+  background: var(--white);
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  padding: 36px 40px;
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  box-shadow: 0 8px 40px rgba(10, 22, 40, 0.1);
+  margin-bottom: 40px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Bordure gauche dorée */
+.profile-card::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: linear-gradient(180deg, var(--gold), var(--gold-light));
+  border-radius: 4px 0 0 4px;
+}
+
+/* ── Avatar ── */
+
+.avatar-wrap {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.avatar {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--navy), var(--blue));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Playfair Display', serif;
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: var(--gold);
+  border: 3px solid var(--gold);
+  box-shadow: 0 4px 20px rgba(201, 168, 76, 0.25);
+  user-select: none;
+}
+
+/* Point vert "en ligne" */
+.avatar-status {
+  position: absolute;
+  bottom: 4px;
+  right: 4px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--green);
+  border: 2.5px solid var(--white);
+}
+
+/* ── Informations profil ── */
+
+.profile-info {
+  flex: 1;
+}
+
+.profile-name {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.7rem;
+  font-weight: 700;
+  color: var(--navy);
+  margin-bottom: 5px;
+  line-height: 1.2;
+}
+
+.profile-email {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 0.88rem;
+  color: var(--gray);
+  margin-bottom: 14px;
+}
+
+/* Icône e-mail dans la ligne */
+.profile-email img {
+  width: 14px;
+  height: 14px;
+  opacity: 0.5;
+}
+
+.profile-badges {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.profile-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 12px;
+  border-radius: 100px;
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.3px;
+}
+
+.profile-badge img {
+  width: 10px;
+  height: 10px;
+}
+
+.badge-member {
+  background: rgba(201, 168, 76, 0.12);
+  color: #9a7530;
+  border: 1px solid rgba(201, 168, 76, 0.3);
+}
+
+/* Teinte dorée pour l'icône du badge membre */
+.badge-member img {
+  filter: invert(48%) sepia(60%) saturate(500%) hue-rotate(5deg);
+}
+
+.badge-verified {
+  background: rgba(45, 158, 107, 0.1);
+  color: var(--green);
+  border: 1px solid rgba(45, 158, 107, 0.25);
+}
+
+/* Teinte verte pour l'icône du badge vérifié */
+.badge-verified img {
+  filter: invert(50%) sepia(60%) saturate(500%) hue-rotate(110deg);
+}
+
+/* ── Statistiques ── */
+
+.profile-stats {
+  display: flex;
+  border-left: 1px solid var(--border);
+  padding-left: 32px;
+  flex-shrink: 0;
+}
+
+.stat-item {
+  text-align: center;
+  padding: 0 24px;
+  border-right: 1px solid var(--border);
+}
+
+.stat-item:last-child {
+  border-right: none;
+}
+
+.stat-num {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--navy);
+  line-height: 1;
+  margin-bottom: 5px;
+}
+
+.stat-label {
+  font-size: 0.7rem;
+  color: var(--gray);
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+}
+
+/* ── Bouton modifier ── */
+
+.btn-edit {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 22px;
+  background: var(--navy);
+  color: var(--white);
+  border: none;
+  border-radius: 10px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.25s;
+  flex-shrink: 0;
+  text-decoration: none;
+}
+
+/* Icône blanche dans le bouton */
+.btn-edit img {
+  width: 15px;
+  height: 15px;
+}
+
+.btn-edit:hover {
+  background: var(--blue);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(10, 22, 40, 0.18);
+}
+
+
+/* ════════════════════════════════════════════════
+   EN-TÊTES DE SECTION
+════════════════════════════════════════════════ */
+
+.section-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.section-eyebrow {
+  font-size: 0.68rem;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--gold);
+  font-weight: 500;
+  margin-bottom: 6px;
+}
+
+.section-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--navy);
+}
+
+.section-count {
+  font-size: 0.82rem;
+  color: var(--gray);
+  padding: 5px 14px;
+  background: rgba(10, 22, 40, 0.05);
+  border-radius: 100px;
+  margin-bottom: 4px;
+}
+
+
+/* ════════════════════════════════════════════════
+   GALERIE DE BILLETS  (scroll horizontal)
+════════════════════════════════════════════════ */
+
+.tickets-outer {
+  position: relative;
+  margin-bottom: 48px;
+}
+
+.tickets-scroll {
+  display: flex;
+  gap: 18px;
+  overflow-x: auto;
+  padding: 8px 4px 20px;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: var(--gold) transparent;
+  cursor: grab;
+}
+
+.tickets-scroll:active {
+  cursor: grabbing;
+}
+
+.tickets-scroll::-webkit-scrollbar       { height: 4px; }
+.tickets-scroll::-webkit-scrollbar-track { background: transparent; }
+.tickets-scroll::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 10px; }
+
+/* ── Flèches de navigation ── */
+
+.scroll-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-60%);
+  width: 40px;
+  height: 40px;
+  background: var(--white);
+  border: 1.5px solid var(--border);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 10;
+  box-shadow: 0 4px 12px rgba(10, 22, 40, 0.12);
+  transition: all 0.2s;
+}
+
+.scroll-arrow img {
+  width: 16px;
+  height: 16px;
+  transition: filter 0.2s;
+}
+
+.scroll-arrow.left  { left: -20px; }
+.scroll-arrow.right { right: -20px; }
+
+.scroll-arrow:hover {
+  background: var(--navy);
+  border-color: var(--navy);
+}
+
+/* Icône blanche au survol */
+.scroll-arrow:hover img {
+  filter: invert(1);
+}
+
+
+/* ════════════════════════════════════════════════
+   CARTE BILLET
+════════════════════════════════════════════════ */
+
+.ticket-card {
+  flex-shrink: 0;
+  width: 280px;
+  background: var(--white);
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  overflow: hidden;
+  scroll-snap-align: start;
+  box-shadow: 0 4px 20px rgba(10, 22, 40, 0.07);
+  transition: all 0.3s;
+  position: relative;
+}
+
+.ticket-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 36px rgba(10, 22, 40, 0.13);
+  border-color: rgba(201, 168, 76, 0.4);
+}
+
+/* ── En-tête du billet ── */
+
+.ticket-header {
+  padding: 18px 22px 14px;
+  background: linear-gradient(135deg, var(--navy), var(--blue));
+  position: relative;
+  overflow: hidden;
+}
+
+/* Cercle décoratif */
+.ticket-header::before {
+  content: '';
+  position: absolute;
+  right: -20px;
+  top: -20px;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+/* Tag de classe (coin supérieur droit) */
+.ticket-class-tag {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  padding: 3px 8px;
+  background: rgba(201, 168, 76, 0.2);
+  border: 1px solid rgba(201, 168, 76, 0.4);
+  border-radius: 100px;
+  font-size: 0.6rem;
+  letter-spacing: 1px;
+  color: var(--gold-light);
+  text-transform: uppercase;
+}
+
+/* Numéro de train */
+.ticket-train-num {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.65rem;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 10px;
+}
+
+/* Icône train dans le numéro — teinte dorée */
+.ticket-train-num img {
+  width: 12px;
+  height: 12px;
+  filter: invert(72%) sepia(45%) saturate(400%) hue-rotate(5deg);
+}
+
+/* Route : Ville → Ville */
+.ticket-route {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ticket-city {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--white);
+}
+
+.ticket-arrow-wrap {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 4px;
+}
+
+/* Ligne avec flèche dorée */
+.ticket-arrow-line {
+  width: 100%;
+  height: 1.5px;
+  background: linear-gradient(90deg,
+    rgba(201, 168, 76, 0.3),
+    var(--gold),
+    rgba(201, 168, 76, 0.3));
+  position: relative;
+}
+
+.ticket-arrow-line::after {
+  content: '›';
+  position: absolute;
+  right: -1px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--gold);
+  font-size: 1rem;
+  line-height: 0;
+}
+
+.ticket-dur {
+  font-size: 0.62rem;
+  color: rgba(255, 255, 255, 0.45);
+  margin-top: 4px;
+  letter-spacing: 0.5px;
+}
+
+/* ── Corps du billet ── */
+
+.ticket-body {
+  padding: 16px 22px 18px;
+}
+
+/* Effet perforateur */
+.ticket-punch {
+  display: flex;
+  align-items: center;
+  margin: 0 -22px 16px;
+}
+
+.punch-hole {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--light);
+  border: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.punch-line {
+  flex: 1;
+  border-top: 2px dashed #e8e2d8;
+  margin: 0 2px;
+}
+
+/* Grille de détails 2×2 */
+.ticket-details {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.detail-label {
+  font-size: 0.62rem;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--gray);
+  margin-bottom: 3px;
+}
+
+.detail-value {
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: var(--navy);
+}
+
+/* Pied du billet */
+.ticket-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.ticket-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 100px;
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+.status-used      { background: rgba(10, 22, 40, 0.07);  color: var(--gray);  }
+.status-upcoming  { background: rgba(45, 158, 107, 0.1); color: var(--green); }
+.status-cancelled { background: rgba(224, 82, 82, 0.08); color: #e05252;      }
+
+.ticket-price {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--navy);
+}
+
+
+/* ════════════════════════════════════════════════
+   GRILLE DU MENU COMPTE  (3 colonnes)
+════════════════════════════════════════════════ */
+
+.account-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 48px;
+}
+
+.account-menu-card {
+  background: var(--white);
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  cursor: pointer;
+  transition: all 0.25s;
+  text-decoration: none;
+}
+
+.account-menu-card:hover {
+  border-color: rgba(201, 168, 76, 0.4);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(10, 22, 40, 0.07);
+}
+
+/* Carré d'icône navy */
+.menu-card-icon {
+  width: 48px;
+  height: 48px;
+  background: linear-gradient(135deg, var(--navy), var(--blue));
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* Toutes les icônes dans le carré sont blanches */
+.menu-card-icon img {
+  width: 22px;
+  height: 22px;
+  filter: invert(1);
+}
+
+.menu-card-text h4 {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--navy);
+  margin-bottom: 3px;
+}
+
+.menu-card-text p {
+  font-size: 0.75rem;
+  color: var(--gray);
+  font-weight: 300;
+}
+
+/* Flèche droite */
+.menu-card-arrow {
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.menu-card-arrow img {
+  width: 16px;
+  height: 16px;
+  opacity: 0.3;
+  transition: all 0.2s;
+}
+
+.account-menu-card:hover .menu-card-arrow img {
+  opacity: 1;
+  transform: translateX(3px);
+  /* teinte dorée au survol */
+  filter: invert(72%) sepia(45%) saturate(400%) hue-rotate(5deg);
+}
+
+
+/* ════════════════════════════════════════════════
+   SECTION DÉCONNEXION
+════════════════════════════════════════════════ */
+
+.logout-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 48px 0 0;
+  border-top: 1px solid var(--border);
+  gap: 12px;
+}
+
+.logout-note {
+  font-size: 0.8rem;
+  color: var(--gray);
+  font-weight: 300;
+}
+
+.btn-logout {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 15px 52px;
+  background: transparent;
+  color: #c0392b;
+  border: 1.5px solid rgba(192, 57, 43, 0.35);
+  border-radius: 12px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: all 0.25s;
+  min-width: 220px;
+}
+
+/* Icône déconnexion — teinte rouge */
+.btn-logout img {
+  width: 18px;
+  height: 18px;
+  filter: invert(22%) sepia(80%) saturate(800%) hue-rotate(340deg);
+}
+
+.btn-logout:hover {
+  background: #c0392b;
+  color: var(--white);
+  border-color: #c0392b;
+  box-shadow: 0 8px 24px rgba(192, 57, 43, 0.25);
+  transform: translateY(-1px);
+}
+
+/* Icône blanche au survol */
+.btn-logout:hover img {
+  filter: invert(1);
+}
+
+
+/* ════════════════════════════════════════════════
+   RESPONSIVE
+════════════════════════════════════════════════ */
+
+@media (max-width: 900px) {
+
+  .topbar       { padding: 0 24px; }
+  .page-band    { padding: 40px 24px 70px; }
+  .page-content { padding: 0 20px 60px; transform: translateY(-36px); }
+
+  .profile-card { flex-wrap: wrap; gap: 20px; }
+
+  .profile-stats {
+    border-left: none;
+    padding-left: 0;
+    border-top: 1px solid var(--border);
+    padding-top: 20px;
+    width: 100%;
+    justify-content: space-around;
+  }
+
+  .stat-item    { border-right: none; padding: 0 16px; }
+
+  .account-grid { grid-template-columns: 1fr 1fr; }
+  .nav-links    { display: none; }
+}
+
+@media (max-width: 600px) {
+  .account-grid { grid-template-columns: 1fr; }
+  .ticket-card  { width: 240px; }
+}
