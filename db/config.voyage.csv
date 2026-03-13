@@ -1,0 +1,3 @@
+_id,depart,arriver,date_depart,temps_arriver,prix,id_train,escale[0],escale[1],temps_escale[0],temps_escale[1]
+69ac6ffff76fd20653c6415e,paris,lion,08/03/2026,5h6min,500,69ac6edbf76fd20653c6415d,,,,
+69ac6ffff76fd20653c6415f,paris,lion,08/03/2026,8h6min,400,69ac6edbf76fd20653c6415d,marseille,berlin,5h3min,1h20min
