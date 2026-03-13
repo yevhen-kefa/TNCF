@@ -1,5 +1,6 @@
-.yml
-.txt
-.doc
+*.yml
+*.txt
+*.doc
 .env
 Dockerfile
+docker-compose.yml
