@@ -1,5 +1,5 @@
 import React, {useState} from "react";
-
+import '../assets/style/login.css';
 
 interface FormMessage{
     text: string,
@@ -7,9 +7,47 @@ interface FormMessage{
 }
 
 export default function Login(){
+    //STATE FOR INPUTS AND UI
+    const[email, setEmail] = useState<string>('');
+    const[pass, setPass] = useState<string>('');
+    const[message, setMessage] = useState<FormMessage>({text: '', color: ''});
+    const[isLoading, setIsLoading] = useState<boolean>(false);
+
+    //HANDLE LOGIN EVENT
+    const handleLogin = async(e: React.MouseEvent<HTMLButtonElement>) => {
+        e.preventDefault();
+
+        //reset message
+        setMessage({text: '', color: ''});
+
+        //validation
+        if (!email || !pass){
+            setMessage({ text: 'Veuillez remplir tous les champs.', color: '#e05252' });
+            return;
+        }
+
+        setIsLoading(true);
+
+        try{
+            //sending request to API
+            const response = await fetch('http://localhost:8000/api_login.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ mail: email, pass: pass })
+            });
+            const data = await response.json();
 
 
+            //redirect to homepage after success
+            if(data.status === 'success'){
+                setMessage({text: 'Connextion reussie!', color: '#2d9e6b'});
+                setTimeout(() => {
+                    window.location.href = '/';
+                })
+            }
+        }
 
+    }
 
     return (
         <>
