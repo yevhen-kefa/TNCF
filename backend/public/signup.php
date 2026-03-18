@@ -6,6 +6,27 @@
 <title>TNCF — Créer un compte</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="./style/singup.css">
+<style>
+  /* Styles for the alert message */
+  .alert-message {
+    padding: 12px;
+    border-radius: 8px;
+    margin-top: 16px;
+    font-size: 0.85rem;
+    display: none;
+    text-align: center;
+  }
+  .alert-error {
+    background-color: #fde8e8;
+    color: #c53030;
+    border: 1px solid #feb2b2;
+  }
+  .alert-success {
+    background-color: #e6fffa;
+    color: #276749;
+    border: 1px solid #b2f5ea;
+  }
+</style>
 </head>
 <body>
 
@@ -15,7 +36,7 @@
       <img src="img/logo.svg" alt="">
     </div>
   </a>
-  <a href="login.html" class="topbar-link">Déjà un compte ? <span>Se connecter →</span></a>
+  <a href="login.php" class="topbar-link">Déjà un compte ? <span>Se connecter →</span></a>
 </nav>
 
 <div class="signup-wrapper">
@@ -44,9 +65,7 @@
 
   <div class="card">
 
-    <!-- Benefits -->
     <div class="benefits">
-      
       <div class="benefit-item">
         <div class="benefit-icon">
           <img src="img/layer.svg" alt="">
@@ -67,8 +86,16 @@
       </div>
     </div>
 
-    <!-- Personal info -->
     <div class="section-label">Informations personnelles</div>
+    
+    <div class="form-group" style="margin-bottom: 16px;">
+      <label class="form-label">Civilité</label>
+      <div class="input-wrap" style="display: flex; gap: 16px;">
+        <label><input type="radio" name="civilite" value="M" checked> M.</label>
+        <label><input type="radio" name="civilite" value="Mme"> Mme.</label>
+      </div>
+    </div>
+
     <div class="form-row">
       <div class="form-group">
         <label class="form-label">Prénom</label>
@@ -76,7 +103,7 @@
           <span class="input-icon">
             <img src="img/person.svg" alt="">
           </span>
-          <input class="form-input" type="text" placeholder="Jean">
+          <input class="form-input" type="text" id="prenom" placeholder="Jean">
         </div>
       </div>
       <div class="form-group">
@@ -85,7 +112,7 @@
           <span class="input-icon">
             <img src="img/person.svg" alt="">
           </span>
-          <input class="form-input" type="text" placeholder="Dupont">
+          <input class="form-input" type="text" id="nom" placeholder="Dupont">
         </div>
       </div>
     </div>
@@ -94,13 +121,13 @@
       <div class="form-group">
         <label class="form-label">Date de naissance</label>
         <div class="input-wrap">
-          <input class="form-input" type="date" style="padding-left:42px">
+          <input class="form-input" type="date" id="dob" style="padding-left:42px">
         </div>
       </div>
       <div class="form-group">
         <label class="form-label">Téléphone</label>
         <div class="input-wrap">
-          <input class="form-input" type="tel" placeholder="+33 6 00 00 00 00">
+          <input class="form-input" type="tel" id="telephone" placeholder="+33 6 00 00 00 00">
         </div>
       </div>
     </div>
@@ -111,11 +138,10 @@
         <span class="input-icon">
           <img src="img/mail.svg" alt="">
         </span>
-        <input class="form-input" type="email" placeholder="votre@email.com">
+        <input class="form-input" type="email" id="email" placeholder="votre@email.com">
       </div>
     </div>
 
-    <!-- Password section -->
     <div class="section-label" style="margin-top:16px">Sécurité</div>
 
     <div class="form-row">
@@ -141,13 +167,14 @@
           <span class="input-icon">
             <img src="img/pass.svg" alt="">
           </span>
-          <input class="form-input" type="password" placeholder="Répétez le mot de passe">
+          <input class="form-input" type="password" id="pwd_confirm" placeholder="Répétez le mot de passe">
         </div>
       </div>
     </div>
 
+    <div id="form-message" class="alert-message"></div>
 
-    <button class="btn-submit" onclick="window.location.href='home.html'">
+    <button class="btn-submit" id="btn-register" onclick="registerUser(event)">
       CRÉER MON COMPTE
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
     </button>
@@ -157,6 +184,7 @@
 </div>
 
 <script>
+// Visual password strength indicator
 function checkStrength(val) {
   const bars = [s1,s2,s3,s4];
   bars.forEach(b => { b.className = 'strength-bar'; });
@@ -171,6 +199,91 @@ function checkStrength(val) {
   const cls = ['', 'weak', 'medium', 'strong', 'strong'];
   for (let i = 0; i < score; i++) bars[i].classList.add(cls[score]);
   txt.textContent = labels[score] || 'Trop court';
+}
+
+// Display message helper
+function showMessage(msg, type) {
+  const msgBox = document.getElementById('form-message');
+  msgBox.textContent = msg;
+  msgBox.className = 'alert-message ' + (type === 'error' ? 'alert-error' : 'alert-success');
+  msgBox.style.display = 'block';
+}
+
+// Handle registration request
+function registerUser(e) {
+  e.preventDefault(); // Prevent default button behavior
+  
+  // 1. Gather input values
+  const prenom = document.getElementById('prenom').value.trim();
+  const nom = document.getElementById('nom').value.trim();
+  const telephone = document.getElementById('telephone').value.trim();
+  const email = document.getElementById('email').value.trim();
+  const pass = document.getElementById('pwd').value;
+  const passConfirm = document.getElementById('pwd_confirm').value;
+  
+  // Get checked radio button for civilite
+  const civilite = document.querySelector('input[name="civilite"]:checked').value;
+
+  // 2. Basic front-end validation
+  if (!prenom || !nom || !telephone || !email || !pass) {
+    showMessage('Veuillez remplir tous les champs obligatoires.', 'error');
+    return;
+  }
+
+  if (pass !== passConfirm) {
+    showMessage('Les mots de passe ne correspondent pas.', 'error');
+    return;
+  }
+
+  if (pass.length < 8) {
+    showMessage('Le mot de passe doit contenir au moins 8 caractères.', 'error');
+    return;
+  }
+
+  // Disable button to prevent double submission
+  const btn = document.getElementById('btn-register');
+  btn.disabled = true;
+  btn.innerHTML = 'CHARGEMENT...';
+
+  // 3. Prepare data payload for the API
+  const payload = {
+    civilite: civilite,
+    prenom: prenom,
+    nom: nom,
+    telephone: telephone,
+    mail: email,
+    pass: pass
+  };
+
+  // 4. Send request to the PHP API
+  fetch('api_register.php', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(payload)
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.status === 'success') {
+      showMessage('Compte créé avec succès ! Redirection...', 'success');
+      
+      // Redirect to login page after 2 seconds
+      setTimeout(() => {
+        window.location.href = 'login.php';
+      }, 2000);
+    } else {
+      showMessage(data.message || 'Une erreur est survenue.', 'error');
+      btn.disabled = false;
+      btn.innerHTML = 'CRÉER MON COMPTE <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>';
+    }
+  })
+  .catch(error => {
+    console.error('API Error:', error);
+    showMessage('Erreur de connexion au serveur.', 'error');
+    btn.disabled = false;
+    btn.innerHTML = 'CRÉER MON COMPTE <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>';
+  });
 }
 </script>
 </body>

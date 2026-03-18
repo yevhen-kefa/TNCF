@@ -63,7 +63,7 @@
         <span class="input-icon">
           <img src="img/mail.svg" alt="">
         </span>
-        <input class="form-input" type="email" placeholder="votre@email.com">
+        <input class="form-input" type="email" id="email" placeholder="votre@email.com">
       </div>
     </div>
 
@@ -73,12 +73,14 @@
         <span class="input-icon">
           <img src="img/pass.svg" alt="">
         </span>
-        <input class="form-input" type="password" placeholder="••••••••">
+        <input class="form-input" type="password" id="password" placeholder="••••••••">
       </div>
       <a href="#" class="forgot-link">Mot de passe oublié ?</a>
     </div>
 
-    <button class="btn-login" onclick="window.location.href='home.html'">SE CONNECTER</button>
+    <div id="login-message" style="margin-bottom: 15px; font-size: 14px; display: none;"></div>
+
+    <button class="btn-login" id="btn-login" onclick="handleLogin(event)">SE CONNECTER</button>
 
     <div class="divider">
       <div class="divider-line"></div>
@@ -97,6 +99,66 @@
     const s = document.createElement('div');
     s.className = 'sleeper';
     sleepersEl.appendChild(s);
+  }
+  /**
+   * Main login handler
+   * @param {Event} e 
+   */
+  async function handleLogin(e) {
+    e.preventDefault();
+    
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    const msgBox = document.getElementById('login-message');
+    const btn = document.getElementById('btn-login');
+
+    // Basic UI reset
+    msgBox.style.display = 'none';
+    
+    if (!email || !password) {
+      msgBox.textContent = "Veuillez remplir tous les champs.";
+      msgBox.style.color = "#e05252";
+      msgBox.style.display = 'block';
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = "CHARGEMENT...";
+
+    try {
+      // Sending request to our new API
+      const response = await fetch('api_login.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mail: email, pass: password })
+      });
+
+      const data = await response.json();
+
+      if (data.status === 'success') {
+        msgBox.textContent = "Connexion réussie ! Redirection...";
+        msgBox.style.color = "#2d9e6b";
+        msgBox.style.display = 'block';
+        
+        // Redirect to index.php after success
+        setTimeout(() => {
+          window.location.href = 'index.php';
+        }, 1500);
+      } else {
+        msgBox.textContent = data.message;
+        msgBox.style.color = "#e05252";
+        msgBox.style.display = 'block';
+        btn.disabled = false;
+        btn.textContent = "SE CONNECTER";
+      }
+    } catch (error) {
+      console.error("Login error:", error);
+      msgBox.textContent = "Erreur de connexion au serveur.";
+      msgBox.style.color = "#e05252";
+      msgBox.style.display = 'block';
+      btn.disabled = false;
+      btn.textContent = "SE CONNECTER";
+    }
   }
 </script>
 </body>

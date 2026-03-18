@@ -21,7 +21,7 @@
     <li><a href="index.php" class="nav-link active">Voyager</a></li>
     <li><a href="#">Billets</a></li>
     <li><a href="#">Offres</a></li>
-    <li><a href="#">Compte</a></li>
+    <li><a href="count.php">Compte</a></li>
   </ul>
 
   <div class="nav-actions">

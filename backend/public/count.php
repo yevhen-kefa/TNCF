@@ -1,3 +1,19 @@
+<?php
+// Start session to access logged-in user data
+session_start();
+
+// Redirect to login if user is not authenticated
+if (!isset($_SESSION['mail'])) {
+    header("Location: login.php");
+    exit();
+}
+
+// Prepare variables for display
+$userFullName = ucfirst($_SESSION['prenom']) . ' ' . strtoupper($_SESSION['nom']);
+$userEmail = $_SESSION['mail'];
+?>
+
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -43,10 +59,10 @@
     </div>
 
     <div class="profile-info">
-      <div class="profile-name">Jean Dupont</div>
+      <div class="profile-name"><?= $userFullName ?></div>
       <div class="profile-email">
         <img src="img/mail.svg" alt="">
-        jean.dupont@email.com
+        <?= $userEmail ?>
       </div>
       <div class="profile-badges">
         <span class="profile-badge badge-member">

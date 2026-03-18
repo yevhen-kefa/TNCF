@@ -1,3 +1,35 @@
+<?php
+session_start();
+require_once __DIR__ . '/../src/Config/Database.php';
+use Config\Database;
+
+try {
+    $db = new Database();
+    $manager = $db->getManager();
+    
+    // 1. Get real data from MongoDB
+    $query = new \MongoDB\Driver\Query([]);
+    $cursor = $manager->executeQuery($db->getDbName() . '.voyages', $query);
+    $realVoyages = $cursor->toArray();
+    
+    // 2. Mock data for "mass" effect (from your script)
+    // We format it to match MongoDB object structure for the loop
+    $mockVoyages = [
+        (object)['_id' => 'm1', 'depart' => 'Paris', 'arriver' => 'Lyon', 'date_depart' => '06:47', 'temps_arriver' => '1h 55', 'prix' => 29, 'num' => 'TGV 6601'],
+        (object)['_id' => 'm2', 'depart' => 'Paris', 'arriver' => 'Lyon', 'date_depart' => '08:01', 'temps_arriver' => '1h 58', 'prix' => 35, 'num' => 'TGV 6603'],
+        (object)['_id' => 'm3', 'depart' => 'Paris', 'arriver' => 'Lyon', 'date_depart' => '10:15', 'temps_arriver' => '1h 55', 'prix' => 42, 'num' => 'TGV 6607'],
+        (object)['_id' => 'm4', 'depart' => 'Paris', 'arriver' => 'Lyon', 'date_depart' => '12:30', 'temps_arriver' => '1h 55', 'prix' => 29, 'num' => 'TGV 6611'],
+        (object)['_id' => 'm5', 'depart' => 'Paris', 'arriver' => 'Lyon', 'date_depart' => '14:47', 'temps_arriver' => '2h 03', 'prix' => 55, 'num' => 'TGV 6615']
+    ];
+
+    // 3. Merge both lists
+    $allVoyages = array_merge($realVoyages, $mockVoyages);
+    
+} catch (\Exception $e) {
+    die("Error: " . $e->getMessage());
+}
+?>
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -187,35 +219,81 @@
 
 
   <!-- ── COLONNE CENTRALE : RÉSULTATS ── -->
-  <main class="results">
-
+  <div class="results" id="trainList">
     <div class="results-header">
       <div class="results-count">
-        <strong>12 trains</strong> disponibles · Aller: Mer 15 mars
+        <strong><?= count($allVoyages) ?></strong> trajets trouvés
       </div>
       <div class="sort-wrap">
-        Trier par
+        Trier par :
         <select class="sort-select">
           <option>Prix croissant</option>
-          <option>Heure de départ</option>
-          <option>Durée</option>
+          <option>Départ le plus tôt</option>
         </select>
       </div>
     </div>
 
-    <!-- Calendrier de prix style SNCF -->
-    <div class="cal-section">
-      <div class="cal-section-label">
-        Train
+    <?php foreach ($allVoyages as $v): ?>
+      <?php 
+        // Helper to display train number
+        $trainNum = isset($v->num) ? $v->num : "TGV INOUI № " . substr((string)$v->_id, -4);
+      ?>
+      <div class="train-card" id="train-<?= (string)$v->_id ?>">
+        <div class="train-card-main">
+          <div class="train-number">
+            <div class="train-label">Train</div>
+            <div class="train-num-badge"><?= $trainNum ?></div>
+          </div>
+
+          <div class="train-timeline">
+            <div class="train-time">
+              <div class="train-hour"><?= $v->date_depart ?></div>
+              <div class="train-station"><?= ucfirst($v->depart) ?></div>
+            </div>
+
+            <div class="train-line">
+              <div class="train-duration"><?= $v->temps_arriver ?></div>
+              <div class="train-track"></div>
+              <div class="train-direct" style="color: #2d9e6b">✓ Direct</div>
+            </div>
+
+            <div class="train-time">
+              <div class="train-hour">Arrivée</div>
+              <div class="train-station"><?= ucfirst($v->arriver) ?></div>
+            </div>
+          </div>
+
+          <div class="train-classes">
+            <div class="class-btn" onclick="selectClass('<?= (string)$v->_id ?>', '2', <?= $v->prix ?>)">
+              <div class="class-label">Classe</div>
+              <div class="class-name">2ème</div>
+              <div class="class-price"><?= $v->prix ?>€</div>
+              <div class="class-seats" style="color: #2d9e6b">Places dispo.</div>
+            </div>
+          </div>
+
+          <button class="train-add-btn" id="addBtn-<?= (string)$v->_id ?>" onclick="addToCart('<?= (string)$v->_id ?>')" disabled style="opacity: 0.4; cursor: not-allowed">
+            Ajouter →
+          </button>
+        </div>
+
+        <button class="expand-toggle" onclick="toggleExpand('<?= (string)$v->_id ?>', this)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="6 9 12 15 18 9"/>
+          </svg>
+          Voir les services inclus
+        </button>
+
+        <div class="train-card-expand" id="expand-<?= (string)$v->_id ?>">
+          <div class="options-tags">
+            <span class="option-tag">🍽️ Restauration à bord</span>
+            <span class="option-tag">📶 WiFi gratuit</span>
+            <span class="option-tag">🚿 WC disponibles</span>
+          </div>
+        </div>
       </div>
-      <div class="cal-rule"></div>
-      <div class="cal-strip" id="calStrip"></div>
-    </div>
-
-    <!-- Liste des trains (générée par JS) -->
-    <div id="trainList"></div>
-
-  </main>
+    <?php endforeach; ?>
+  </div>
 
 
   <!-- ── COLONNE DROITE : PANIER ── -->
@@ -280,476 +358,309 @@
 
 <!-- ════════════════════════════════════════
      JAVASCRIPT
-════════════════════════════════════════ -->
+  ════════════════════════════════════════ -->
 <script>
 
-/* ── DONNÉES ── */
+  /* ── СТАН ── */
+  let selectedTrains  = {};
+  let selectedOptions = new Set();
+  let timerSeconds    = 900;
+  let timerInterval;
 
-const trains = [
-  { id: 1, num: 'TGV 6601', dep: '06:47', arr: '08:42', dur: '1h 55', direct: true,  p2: 29, p1: 89,  seats2: 42, seats1: 8  },
-  { id: 2, num: 'TGV 6603', dep: '08:01', arr: '09:59', dur: '1h 58', direct: true,  p2: 35, p1: 99,  seats2: 24, seats1: 12 },
-  { id: 3, num: 'TGV 6607', dep: '10:15', arr: '12:10', dur: '1h 55', direct: true,  p2: 42, p1: 109, seats2: 38, seats1: 16 },
-  { id: 4, num: 'TGV 6611', dep: '12:30', arr: '14:25', dur: '1h 55', direct: true,  p2: 29, p1: 89,  seats2: 56, seats1: 20 },
-  { id: 5, num: 'TGV 6615', dep: '14:47', arr: '16:50', dur: '2h 03', direct: true,  p2: 55, p1: 139, seats2: 12, seats1: 4  },
-  { id: 6, num: 'TGV 6619', dep: '17:01', arr: '19:10', dur: '2h 09', direct: false, p2: 39, p1: 99,  seats2: 30, seats1: 10 },
-  { id: 7, num: 'TGV 6623', dep: '19:30', arr: '21:25', dur: '1h 55', direct: true,  p2: 45, p1: 119, seats2: 44, seats1: 18 },
-];
-
-const calDays = [
-  { dow: 'Dim', date: '08', price: null },
-  { dow: 'Lun', date: '09', price: null },
-  { dow: 'Mar', date: '10', price: null },
-  { dow: 'Mer', date: '11', price: null, active: true },
-  { dow: 'Jeu', date: '12', price: null },
-  { dow: 'Ven', date: '13', price: 29, cheap: true  },
-  { dow: 'Sam', date: '14', price: 39 },
-  { dow: 'Dim', date: '15', price: 29, cheap: true  },
-  { dow: 'Lun', date: '16', price: 55 },
-  { dow: 'Mar', date: '17', price: 42 },
-  { dow: 'Mer', date: '18', price: 35, cheap: true  },
-  { dow: 'Jeu', date: '19', price: 72 },
-];
-
-const options = [
-  { id: 'silence', name: 'Zone silencieuse',      desc: 'Wagon calme garanti',    price: 5,  icon: '🔇' },
-  { id: 'socket',  name: 'Prise électrique',       desc: '220V à votre siège',     price: 3,  icon: '🔌' },
-  { id: 'luggage', name: 'Bagage supplémentaire',  desc: '+1 valise en soute',     price: 12, icon: '🧳' },
-  { id: 'sms',     name: 'Alertes SMS',            desc: 'Notifications temps réel', price: 2, icon: '📱' },
-  { id: 'cancel',  name: 'Garantie annulation',    desc: 'Remboursement intégral', price: 8,  icon: '🛡️' },
-];
-
-/* ── ÉTAT ── */
-
-let selectedTrains  = {};
-let selectedOptions = new Set();
-let timerSeconds    = 900;
-let timerInterval;
+  const options = [
+    { id: 'silence', name: 'Zone silencieuse',      desc: 'Wagon calme garanti',      price: 5,  icon: '🔇' },
+    { id: 'socket',  name: 'Prise électrique',       desc: '220V à votre siège',       price: 3,  icon: '🔌' },
+    { id: 'luggage', name: 'Bagage supplémentaire',  desc: '+1 valise en soute',       price: 12, icon: '🧳' },
+    { id: 'sms',     name: 'Alertes SMS',            desc: 'Notifications temps réel', price: 2,  icon: '📱' },
+    { id: 'cancel',  name: 'Garantie annulation',    desc: 'Remboursement intégral',   price: 8,  icon: '🛡️' },
+  ];
 
 
-/* ════════════════════
-   CALENDRIER DE PRIX
-════════════════════ */
+  /* ════════════════════
+    SÉLECTION DE CLASSE
+  ════════════════════ */
 
-const calStrip = document.getElementById('calStrip');
+  function selectClass(trainId, cls, price) {
+    const card = document.getElementById('train-' + trainId);
 
-calDays.forEach(function(d) {
-  const el = document.createElement('div');
-  el.className = 'cal-day' + (d.cheap ? ' cheap' : '') + (d.active ? ' active' : '');
+    card.querySelectorAll('.class-btn').forEach(function(btn) {
+      btn.classList.remove('selected');
+    });
 
-  const priceHTML = d.price
-    ? '<div class="cal-price' + (d.cheap ? '' : ' cal-price-dash') + '">' + d.price + '€</div>'
-    : '<div class="cal-price cal-price-dash">-</div>';
+    // Знаходимо натиснуту кнопку по класу
+    card.querySelectorAll('.class-btn').forEach(function(btn) {
+      if (btn.getAttribute('data-class') === cls) {
+        btn.classList.add('selected');
+      }
+    });
 
-  el.innerHTML = '<div class="cal-dow">' + d.dow + '</div>'
-               + '<div class="cal-date">' + d.date + '</div>'
-               + priceHTML;
+    selectedTrains.aller = { trainId: trainId, cls: cls, price: price };
 
-  el.addEventListener('click', function() {
-    document.querySelectorAll('.cal-day').forEach(function(c) { c.classList.remove('active'); });
-    el.classList.add('active');
-  });
-
-  calStrip.appendChild(el);
-});
-
-// Centrer le jour actif au chargement
-setTimeout(function() {
-  const active = calStrip.querySelector('.cal-day.active');
-  if (active) active.scrollIntoView({ inline: 'center', behavior: 'smooth' });
-}, 20);
+    const addBtn = document.getElementById('addBtn-' + trainId);
+    if (addBtn) {
+      addBtn.disabled      = false;
+      addBtn.style.opacity = '1';
+      addBtn.style.cursor  = 'pointer';
+    }
+  }
 
 
-/* ════════════════════
-   CARTES DE TRAIN
-════════════════════ */
+  /* ════════════════════
+    AJOUT AU PANIER
+  ════════════════════ */
 
-const trainList = document.getElementById('trainList');
+  function addToCart(trainId) {
+    if (!selectedTrains.aller || selectedTrains.aller.trainId !== trainId) return;
 
-trains.forEach(function(t) {
+    const sel  = selectedTrains.aller;
+    const card = document.getElementById('train-' + trainId);
 
-  const urgentSeats2 = t.seats2 < 20;
-  const urgentSeats1 = t.seats1 < 10;
+    // Récupère les infos depuis le DOM (généré par PHP)
+    const num     = card.querySelector('.train-num-badge')  ? card.querySelector('.train-num-badge').textContent.trim()  : '';
+    const dep     = card.querySelectorAll('.train-hour')[0] ? card.querySelectorAll('.train-hour')[0].textContent.trim() : '';
+    const arr     = card.querySelectorAll('.train-hour')[1] ? card.querySelectorAll('.train-hour')[1].textContent.trim() : 'Arrivée';
+    const from    = card.querySelectorAll('.train-station')[0] ? card.querySelectorAll('.train-station')[0].textContent.trim() : '';
+    const to      = card.querySelectorAll('.train-station')[1] ? card.querySelectorAll('.train-station')[1].textContent.trim() : '';
 
-  const seatsColor2 = urgentSeats2 ? '#e05252' : '#2d9e6b';
-  const seatsLabel2 = urgentSeats2 ? '⚠ ' + t.seats2 + ' restantes' : t.seats2 + ' places';
+    document.querySelectorAll('.train-card').forEach(function(c) { c.classList.remove('selected'); });
+    card.classList.add('selected');
 
-  const seatsColor1 = urgentSeats1 ? '#e05252' : '#2d9e6b';
-  const seatsLabel1 = urgentSeats1 ? '⚠ ' + t.seats1 + ' restantes' : t.seats1 + ' places';
+    const addBtn = document.getElementById('addBtn-' + trainId);
+    if (addBtn) addBtn.textContent = '✓ Ajouté';
 
-  const directColor = t.direct ? '#2d9e6b' : '#f0a500';
-  const directLabel = t.direct ? '✓ Direct' : '⚡ 1 correspondance';
-  const directTag   = t.direct
-    ? '<span class="option-tag" style="color:#2d9e6b">✓ Train direct</span>'
-    : '<span class="option-tag" style="color:#f0a500">⚡ Correspondance Lyon</span>';
+    updateCart({ num, dep, arr, from, to }, sel);
+    updateCount();
+  }
 
-  const card = document.createElement('div');
-  card.className = 'train-card';
-  card.id = 'train-' + t.id;
 
-  card.innerHTML = `
-    <div class="train-card-main">
+  /* ════════════════════
+    MISE À JOUR DU PANIER
+  ════════════════════ */
 
-      <!-- Badge numéro de train -->
-      <div class="train-number">
-        <div class="train-label">Train</div>
-        <div class="train-num-badge">
-          ${t.num}
-        </div>
-      </div>
+  function updateCart(train, sel) {
+    const classLabel = sel.cls === '1' ? '1ère' : '2ème';
 
-      <!-- Timeline départ → arrivée -->
-      <div class="train-timeline">
-        <div class="train-time">
-          <div class="train-hour">${t.dep}</div>
-          <div class="train-station">Paris (Gare de Lyon)</div>
-        </div>
-        <div class="train-line">
-          <div class="train-duration">${t.dur}</div>
-          <div class="train-track">
-            
+    const optionsHTML = options.map(function(o) {
+      const isSelected = selectedOptions.has(o.id);
+      const checkHTML  = isSelected
+        ? '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>'
+        : '';
+      return `
+        <div class="option-item ${isSelected ? 'selected' : ''}"
+            onclick="toggleOption('${o.id}', ${o.price})"
+            id="opt-${o.id}">
+          <div class="option-info">
+            <div class="option-icon">${o.icon}</div>
+            <div>
+              <div class="option-name">${o.name}</div>
+              <div class="option-desc">${o.desc}</div>
+            </div>
           </div>
-          <div class="train-direct" style="color: ${directColor}">${directLabel}</div>
+          <div class="option-right">
+            <div class="option-price">+${o.price}€</div>
+            <div class="option-check" id="check-${o.id}">${checkHTML}</div>
+          </div>
+        </div>`;
+    }).join('');
+
+    document.getElementById('cartContent').innerHTML = `
+      <div class="cart-items">
+        <div class="cart-item">
+          <div class="cart-item-header">
+            <div class="cart-item-route">
+              ${train.from} → ${train.to}
+              <span style="font-size:0.7rem;color:var(--gray);font-weight:400">(Aller)</span>
+            </div>
+            <button class="cart-item-remove" onclick="removeCart()">✕</button>
+          </div>
+          <div class="cart-item-details">
+            <div>${train.num} · ${train.dep} → ${train.arr}</div>
+            <div>${classLabel} classe · 1 voyageur</div>
+            <div style="color:var(--navy);font-weight:600;margin-top:4px">${sel.price}€</div>
+          </div>
         </div>
-        <div class="train-time">
-          <div class="train-hour">${t.arr}</div>
-          <div class="train-station">Lyon Part-Dieu</div>
+
+        <div class="options-section">
+          <div class="options-title">Options à ajouter</div>
+          ${optionsHTML}
         </div>
       </div>
 
-      <!-- Sélection de classe -->
-      <div class="train-classes">
-        <div class="class-btn" onclick="selectClass(${t.id}, '2', ${t.p2})">
-          <div class="class-label">Classe</div>
-          <div class="class-name">2ème</div>
-          <div class="class-price">${t.p2}€</div>
-          <div class="class-seats" style="color: ${seatsColor2}">${seatsLabel2}</div>
-        </div>
-        <div class="class-btn" onclick="selectClass(${t.id}, '1', ${t.p1})">
-          <div class="class-label">Classe</div>
-          <div class="class-name">1ère</div>
-          <div class="class-price">${t.p1}€</div>
-          <div class="class-seats" style="color: ${seatsColor1}">${seatsLabel1}</div>
-        </div>
+      <div class="promo-input-wrap">
+        <input class="promo-input" type="text" placeholder="CODE PROMO" id="promoInput">
+        <button class="btn-promo" onclick="applyPromo()">Appliquer</button>
       </div>
 
-      <!-- Bouton ajout au panier -->
-      <button
-        class="train-add-btn"
-        id="addBtn-${t.id}"
-        onclick="addToCart(${t.id})"
-        disabled
-        style="opacity: 0.4; cursor: not-allowed">
-        Ajouter →
+      <div class="cart-totals" id="cartTotals"></div>
+
+      <button class="btn-checkout">
+        Procéder au paiement
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M5 12h14M12 5l7 7-7 7"/>
+        </svg>
       </button>
+    `;
 
-    </div><!-- fin train-card-main -->
-
-    <!-- Bouton "services inclus" -->
-    <button class="expand-toggle" onclick="toggleExpand(${t.id}, this)">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <polyline points="6 9 12 15 18 9"/>
-      </svg>
-      Voir les services inclus
-    </button>
-
-    <!-- Panneau services (masqué par défaut) -->
-    <div class="train-card-expand" id="expand-${t.id}">
-      <div class="options-tags">
-        <span class="option-tag">🍽️ Restauration à bord</span>
-        <span class="option-tag">📶 WiFi gratuit</span>
-        <span class="option-tag">🚿 WC disponibles</span>
-        <span class="option-tag">♿ Accessibilité PMR</span>
-        ${directTag}
-      </div>
-    </div>
-  `;
-
-  trainList.appendChild(card);
-});
-
-
-/* ════════════════════
-   SÉLECTION DE CLASSE
-════════════════════ */
-
-function selectClass(trainId, cls, price) {
-
-  // Mettre à jour l'apparence des boutons de classe
-  const card = document.getElementById('train-' + trainId);
-  card.querySelectorAll('.class-btn').forEach(function(btn, i) {
-    const isSelected = (i === 0 && cls === '2') || (i === 1 && cls === '1');
-    btn.classList.toggle('selected', isSelected);
-  });
-
-  // Mémoriser la sélection
-  selectedTrains.aller = { trainId: trainId, cls: cls, price: price };
-
-  // Activer le bouton "Ajouter"
-  const addBtn = document.getElementById('addBtn-' + trainId);
-  addBtn.disabled = false;
-  addBtn.style.opacity = '1';
-  addBtn.style.cursor  = 'pointer';
-}
-
-
-/* ════════════════════
-   AJOUT AU PANIER
-════════════════════ */
-
-function addToCart(trainId) {
-  if (!selectedTrains.aller || selectedTrains.aller.trainId !== trainId) return;
-
-  const train = trains.find(function(t) { return t.id === trainId; });
-  const sel   = selectedTrains.aller;
-
-  // Marquer la carte comme sélectionnée
-  document.querySelectorAll('.train-card').forEach(function(c) { c.classList.remove('selected'); });
-  document.getElementById('train-' + trainId).classList.add('selected');
-  document.getElementById('addBtn-' + trainId).textContent = '✓ Ajouté';
-
-  updateCart(train, sel);
-  updateCount();
-}
-
-
-/* ════════════════════
-   MISE À JOUR DU PANIER
-════════════════════ */
-
-function updateCart(train, sel) {
-
-  const classLabel = sel.cls === '1' ? '1ère' : '2ème';
-
-  const optionsHTML = options.map(function(o) {
-    const isSelected = selectedOptions.has(o.id);
-    const checkHTML  = isSelected
-      ? '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>'
-      : '';
-    return `
-      <div class="option-item ${isSelected ? 'selected' : ''}"
-           onclick="toggleOption('${o.id}', ${o.price})"
-           id="opt-${o.id}">
-        <div class="option-info">
-          <div class="option-icon">${o.icon}</div>
-          <div>
-            <div class="option-name">${o.name}</div>
-            <div class="option-desc">${o.desc}</div>
-          </div>
-        </div>
-        <div class="option-right">
-          <div class="option-price">+${o.price}€</div>
-          <div class="option-check" id="check-${o.id}">${checkHTML}</div>
-        </div>
-      </div>`;
-  }).join('');
-
-  document.getElementById('cartContent').innerHTML = `
-    <div class="cart-items">
-
-      <div class="cart-item">
-        <div class="cart-item-header">
-          <div class="cart-item-route">
-            Paris → Lyon
-            <span style="font-size: 0.7rem; color: var(--gray); font-weight: 400">(Aller)</span>
-          </div>
-          <button class="cart-item-remove" onclick="removeCart()">✕</button>
-        </div>
-        <div class="cart-item-details">
-          <div>${train.num} · ${train.dep} → ${train.arr}</div>
-          <div>${classLabel} classe · 1 voyageur</div>
-          <div style="color: var(--navy); font-weight: 600; margin-top: 4px">${sel.price}€</div>
-        </div>
-      </div>
-
-      <div class="options-section">
-        <div class="options-title">Options à ajouter</div>
-        ${optionsHTML}
-      </div>
-
-    </div>
-
-    <div class="promo-input-wrap">
-      <input class="promo-input" type="text" placeholder="CODE PROMO" id="promoInput">
-      <button class="btn-promo" onclick="applyPromo()">Appliquer</button>
-    </div>
-
-    <div class="cart-totals" id="cartTotals"></div>
-
-    <button class="btn-checkout">
-      Procéder au paiement
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M5 12h14M12 5l7 7-7 7"/>
-      </svg>
-    </button>
-  `;
-
-  computeTotal(sel.price);
-}
-
-
-/* ════════════════════
-   OPTIONS
-════════════════════ */
-
-function toggleOption(id, price) {
-  if (selectedOptions.has(id)) {
-    selectedOptions.delete(id);
-  } else {
-    selectedOptions.add(id);
+    computeTotal(sel.price);
   }
 
-  const el  = document.getElementById('opt-' + id);
-  const chk = document.getElementById('check-' + id);
 
-  el.classList.toggle('selected');
+  /* ════════════════════
+    OPTIONS
+  ════════════════════ */
 
-  if (selectedOptions.has(id)) {
-    chk.innerHTML    = '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>';
-    chk.style.background   = 'var(--navy)';
-    chk.style.borderColor  = 'var(--navy)';
-  } else {
-    chk.innerHTML          = '';
-    chk.style.background   = '';
-    chk.style.borderColor  = '';
-  }
-
-  if (selectedTrains.aller) {
-    computeTotal(selectedTrains.aller.price);
-  }
-}
-
-
-/* ════════════════════
-   CALCUL DU TOTAL
-════════════════════ */
-
-function computeTotal(basePrice) {
-  let optTotal = 0;
-  options.forEach(function(o) {
-    if (selectedOptions.has(o.id)) optTotal += o.price;
-  });
-
-  const total = basePrice + optTotal;
-
-  document.getElementById('cartTotals').innerHTML =
-      '<div class="total-row"><span>Billet</span><span>' + basePrice + '€</span></div>'
-    + (optTotal > 0 ? '<div class="total-row"><span>Options</span><span>+' + optTotal + '€</span></div>' : '')
-    + '<div class="total-row main"><span>Total</span><span>' + total + '€</span></div>';
-}
-
-
-/* ════════════════════
-   SUPPRESSION DU PANIER
-════════════════════ */
-
-function removeCart() {
-  selectedTrains  = {};
-  selectedOptions.clear();
-
-  document.querySelectorAll('.train-card').forEach(function(c) { c.classList.remove('selected'); });
-  document.querySelectorAll('.train-add-btn').forEach(function(b) {
-    b.textContent  = 'Ajouter →';
-    b.disabled     = true;
-    b.style.opacity = '0.4';
-  });
-
-  document.getElementById('cartContent').innerHTML = `
-    <div class="cart-empty">
-      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
-        <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
-        <line x1="3" y1="6" x2="21" y2="6"/>
-        <path d="M16 10a4 4 0 0 1-8 0"/>
-      </svg>
-      <p>Sélectionnez un train et une classe pour commencer votre réservation</p>
-    </div>`;
-
-  updateCount();
-}
-
-
-/* ════════════════════
-   CODE PROMO
-════════════════════ */
-
-function applyPromo() {
-  const code = document.getElementById('promoInput').value.toUpperCase();
-  if (code === 'TNCF20') {
-    alert('Code TNCF20 appliqué ! -20% sur votre commande.');
-  } else {
-    alert('Code invalide. Réessayez.');
-  }
-}
-
-
-/* ════════════════════
-   COMPTEUR PANIER
-════════════════════ */
-
-function updateCount() {
-  const n = Object.keys(selectedTrains).length;
-  document.getElementById('cartCount').textContent  = n;
-  document.getElementById('cartBadge').textContent  = n + ' billet' + (n > 1 ? 's' : '');
-}
-
-
-/* ════════════════════
-   EXPAND "SERVICES INCLUS"
-════════════════════ */
-
-function toggleExpand(id, btn) {
-  const panel = document.getElementById('expand-' + id);
-  panel.classList.toggle('open');
-  btn.querySelector('svg').style.transform = panel.classList.contains('open') ? 'rotate(180deg)' : '';
-}
-
-
-/* ════════════════════
-   TIMER DE SESSION
-════════════════════ */
-
-function formatTime(seconds) {
-  const m = Math.floor(seconds / 60).toString().padStart(2, '0');
-  const s = (seconds % 60).toString().padStart(2, '0');
-  return m + ':' + s;
-}
-
-function startTimer() {
-  timerSeconds = 900;
-  clearInterval(timerInterval);
-
-  timerInterval = setInterval(function() {
-    timerSeconds--;
-
-    const timeStr  = formatTime(timerSeconds);
-    const isUrgent = timerSeconds <= 30;
-    const className = 'timer-count' + (isUrgent ? ' urgent' : '');
-
-    document.getElementById('topTimer').textContent  = timeStr;
-    document.getElementById('sideTimer').textContent = timeStr;
-    document.getElementById('topTimer').className    = className;
-    document.getElementById('sideTimer').className   = className;
-
-    if (timerSeconds <= 0) {
-      clearInterval(timerInterval);
-      document.getElementById('sessionModal').style.display = 'flex';
+  function toggleOption(id, price) {
+    if (selectedOptions.has(id)) {
+      selectedOptions.delete(id);
+    } else {
+      selectedOptions.add(id);
     }
 
-  }, 1000);
-}
+    const el  = document.getElementById('opt-' + id);
+    const chk = document.getElementById('check-' + id);
+    el.classList.toggle('selected');
 
-function resetTimer() {
-  document.getElementById('sessionModal').style.display = 'none';
-  startTimer();
-}
+    if (selectedOptions.has(id)) {
+      chk.innerHTML         = '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>';
+      chk.style.background  = 'var(--navy)';
+      chk.style.borderColor = 'var(--navy)';
+    } else {
+      chk.innerHTML         = '';
+      chk.style.background  = '';
+      chk.style.borderColor = '';
+    }
 
-// Réinitialiser le timer sur toute activité utilisateur
-['click', 'keydown', 'mousemove'].forEach(function(event) {
-  document.addEventListener(event, function() {
-    if (timerSeconds > 0) timerSeconds = 900;
+    if (selectedTrains.aller) {
+      computeTotal(selectedTrains.aller.price);
+    }
+  }
+
+
+  /* ════════════════════
+    CALCUL DU TOTAL
+  ════════════════════ */
+
+  function computeTotal(basePrice) {
+    let optTotal = 0;
+    options.forEach(function(o) {
+      if (selectedOptions.has(o.id)) optTotal += o.price;
+    });
+
+    const total = basePrice + optTotal;
+
+    document.getElementById('cartTotals').innerHTML =
+        '<div class="total-row"><span>Billet</span><span>' + basePrice + '€</span></div>'
+      + (optTotal > 0 ? '<div class="total-row"><span>Options</span><span>+' + optTotal + '€</span></div>' : '')
+      + '<div class="total-row main"><span>Total</span><span>' + total + '€</span></div>';
+  }
+
+
+  /* ════════════════════
+    SUPPRESSION DU PANIER
+  ════════════════════ */
+
+  function removeCart() {
+    selectedTrains  = {};
+    selectedOptions.clear();
+
+    document.querySelectorAll('.train-card').forEach(function(c) { c.classList.remove('selected'); });
+    document.querySelectorAll('.train-add-btn').forEach(function(b) {
+      b.textContent   = 'Ajouter →';
+      b.disabled      = true;
+      b.style.opacity = '0.4';
+    });
+
+    document.getElementById('cartContent').innerHTML = `
+      <div class="cart-empty">
+        <img src="img/box_g.svg" alt="">
+        <p>Sélectionnez un train et une classe pour commencer votre réservation</p>
+      </div>`;
+
+    updateCount();
+  }
+
+
+  /* ════════════════════
+    CODE PROMO
+  ════════════════════ */
+
+  function applyPromo() {
+    const code = document.getElementById('promoInput').value.toUpperCase();
+    if (code === 'TNCF20') {
+      alert('Code TNCF20 appliqué ! -20% sur votre commande.');
+    } else {
+      alert('Code invalide. Réessayez.');
+    }
+  }
+
+
+  /* ════════════════════
+    COMPTEUR PANIER
+  ════════════════════ */
+
+  function updateCount() {
+    const n = Object.keys(selectedTrains).length;
+    document.getElementById('cartCount').textContent = n;
+    document.getElementById('cartBadge').textContent = n + ' billet' + (n > 1 ? 's' : '');
+  }
+
+
+  /* ════════════════════
+    EXPAND "SERVICES INCLUS"
+  ════════════════════ */
+
+  function toggleExpand(id, btn) {
+    const panel = document.getElementById('expand-' + id);
+    panel.classList.toggle('open');
+    btn.querySelector('svg').style.transform = panel.classList.contains('open') ? 'rotate(180deg)' : '';
+  }
+
+
+  /* ════════════════════
+    TIMER DE SESSION
+  ════════════════════ */
+
+  function formatTime(seconds) {
+    const m = Math.floor(seconds / 60).toString().padStart(2, '0');
+    const s = (seconds % 60).toString().padStart(2, '0');
+    return m + ':' + s;
+  }
+
+  function startTimer() {
+    timerSeconds = 900;
+    clearInterval(timerInterval);
+
+    timerInterval = setInterval(function() {
+      timerSeconds--;
+
+      const timeStr   = formatTime(timerSeconds);
+      const isUrgent  = timerSeconds <= 30;
+      const className = 'timer-count' + (isUrgent ? ' urgent' : '');
+
+      document.getElementById('topTimer').textContent  = timeStr;
+      document.getElementById('sideTimer').textContent = timeStr;
+      document.getElementById('topTimer').className    = className;
+      document.getElementById('sideTimer').className   = className;
+
+      if (timerSeconds <= 0) {
+        clearInterval(timerInterval);
+        document.getElementById('sessionModal').style.display = 'flex';
+      }
+    }, 1000);
+  }
+
+  function resetTimer() {
+    document.getElementById('sessionModal').style.display = 'none';
+    startTimer();
+  }
+
+  ['click', 'keydown', 'mousemove'].forEach(function(event) {
+    document.addEventListener(event, function() {
+      if (timerSeconds > 0) timerSeconds = 900;
+    });
   });
-});
 
-startTimer();
+  startTimer();
 
 </script>
 </body>
