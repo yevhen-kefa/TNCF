@@ -2,6 +2,16 @@ import React, { useState } from 'react';
  import '../assets/style/singup.css'; 
 import type { FormData } from '../FormData';
 
+
+import logoSvg from "../assets/img/logo.svg";
+import layerSvg from "../assets/img/layer.svg";
+import cartSvg from "../assets/img/cart.svg";
+import mailGoldSvg from "../assets/img/mail_gold.svg";
+import personSvg from "../assets/img/person.svg";
+import mailSvg from "../assets/img/mail.svg";
+import passSvg from "../assets/img/pass.svg";
+
+
 interface FormMessage {
   text: string;
   type: 'error' | 'success' | '';
@@ -137,10 +147,11 @@ export default function Signup() {
 
   return (
     <>
+    <div className="signup-page">
       <nav className="topbar">
         <a href="/" className="brand">
           <div className="brand-logo">
-            <img src="/img/logo.svg" alt="Logo" />
+            <img src={logoSvg} alt="Logo" />
           </div>
         </a>
         <a href="/login" className="topbar-link">Déjà un compte ? <span>Se connecter →</span></a>
@@ -148,7 +159,7 @@ export default function Signup() {
 
       <div className="signup-wrapper">
         <div className="signup-header">
-          <div className="eyebrow">Inscription gratuite</div>8
+          <div className="eyebrow">Inscription gratuite</div>
           <h1>Créer mon compte</h1>
           <p>Rejoignez des millions de voyageurs et profitez des meilleurs tarifs</p>
         </div>
@@ -173,15 +184,15 @@ export default function Signup() {
         <div className="card">
           <div className="benefits">
             <div className="benefit-item">
-              <div className="benefit-icon"><img src="/img/layer.svg" alt="" /></div>
+              <div className="benefit-icon"><img src={layerSvg} alt="" /></div>
               Historique des trajets
             </div>
             <div className="benefit-item">
-              <div className="benefit-icon"><img src="/img/cart.svg" alt="" /></div>
+              <div className="benefit-icon"><img src={cartSvg} alt="" /></div>
               Paiement mémorisé
             </div>
             <div className="benefit-item">
-              <div className="benefit-icon"><img src="/img/mail_gold.svg" alt="" /></div>
+              <div className="benefit-icon"><img src={mailGoldSvg} alt="" /></div>
               Alertes SMS
             </div>
           </div>
@@ -204,14 +215,14 @@ export default function Signup() {
             <div className="form-group">
               <label className="form-label">Prénom</label>
               <div className="input-wrap">
-                <span className="input-icon"><img src="/img/person.svg" alt="" /></span>
+                <span className="input-icon"><img src={personSvg} alt="" /></span>
                 <input className="form-input" type="text" id="prenom" placeholder="Jean" value={formData.prenom} onChange={handleChange} />
               </div>
             </div>
             <div className="form-group">
               <label className="form-label">Nom de famille</label>
               <div className="input-wrap">
-                <span className="input-icon"><img src="/img/person.svg" alt="" /></span>
+                <span className="input-icon"><img src={personSvg} alt="" /></span>
                 <input className="form-input" type="text" id="nom" placeholder="Dupont" value={formData.nom} onChange={handleChange} />
               </div>
             </div>
@@ -235,7 +246,7 @@ export default function Signup() {
           <div className="form-group">
             <label className="form-label">Adresse e-mail</label>
             <div className="input-wrap">
-              <span className="input-icon"><img src="/img/mail.svg" alt="" /></span>
+              <span className="input-icon"><img src={mailSvg} alt="" /></span>
               <input className="form-input" type="email" id="email" placeholder="votre@email.com" value={formData.email} onChange={handleChange} />
             </div>
           </div>
@@ -246,7 +257,7 @@ export default function Signup() {
             <div className="form-group">
               <label className="form-label">Mot de passe</label>
               <div className="input-wrap">
-                <span className="input-icon"><img src="/img/pass.svg" alt="" /></span>
+                <span className="input-icon"><img src={passSvg} alt="" /></span>
                 <input className="form-input" type="password" id="pwd" placeholder="Min. 8 caractères" value={formData.pwd} onChange={handleChange} />
               </div>
               <div className="password-strength">
@@ -259,7 +270,7 @@ export default function Signup() {
             <div className="form-group">
               <label className="form-label">Confirmer</label>
               <div className="input-wrap">
-                <span className="input-icon"><img src="/img/pass.svg" alt="" /></span>
+                <span className="input-icon"><img src={passSvg} alt="" /></span>
                 <input className="form-input" type="password" id="pwdConfirm" placeholder="Répétez le mot de passe" value={formData.pwdConfirm} onChange={handleChange} />
               </div>
             </div>
@@ -283,6 +294,7 @@ export default function Signup() {
           <p className="login-link">Déjà inscrit ? <a href="/login">Se connecter</a></p>
         </div>
       </div>
+    </div>
     </>
   );
 }

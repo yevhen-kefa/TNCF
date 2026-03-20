@@ -8,7 +8,8 @@ services:
 
   backend:
     build:
-      context: ./backend
+      context: .
+      dockerfile: Dockerfile
     ports:
       - "8000:80"
     volumes:
@@ -17,13 +18,18 @@ services:
       - db
 
   frontend:
-    image: node:18-alpine
-    working_dir: /app
-    volumes:
-      - ./frontend:/app
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
     ports:
-      - "3000:3000"
-    command: sh -c "npm install && npm start"
+      - "3000:5173"
+    develop:
+      watch:
+        - action: sync
+          path: ./frontend
+          target: /app
+          ignore:
+            - node_modules
 
 volumes:
   mongo_data:
