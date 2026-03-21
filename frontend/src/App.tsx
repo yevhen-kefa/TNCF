@@ -4,6 +4,7 @@ import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 // Import your components
 import Login from './pages/Login';
 import Signup from './pages/Signup';
+import Tickets from './pages/Tickets';
 
 export default function App() {
   return (
@@ -23,6 +24,9 @@ export default function App() {
                 <Link to="/signup" style={{ padding: '10px 20px', background: '#e05252', color: 'white', textDecoration: 'none', borderRadius: '5px' }}>
                   Teste Signup
                 </Link>
+                <Link to="/tickets" style={{ padding: '10px 20px', background: '#d452e0', color: 'white', textDecoration: 'none', borderRadius: '5px' }}>
+                  Teste Tickets
+                </Link>
               </div>
             </div>
           } 
@@ -31,6 +35,7 @@ export default function App() {
         {/* Your actual routes */}
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
+        <Route path='/tickets' element={<Tickets/>}/>
       </Routes>
     </Router>
   );

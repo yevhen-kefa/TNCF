@@ -148,7 +148,7 @@ export default function Signup() {
   return (
     <>
     <div className="signup-page">
-      <nav className="topbar">
+      <nav className="topbar-signup">
         <a href="/" className="brand">
           <div className="brand-logo">
             <img src={logoSvg} alt="Logo" />
