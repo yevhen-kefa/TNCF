@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import type { Voyage } from "../Voyage";
 import type { SelectedTrain } from "../SelectedTrain";
+import TrainCard from "../components/TrainCard";
+import DateStrip from "../components/DateStrip";
 import '../assets/style/ticket.css'
 
 import logoSvg       from '../assets/img/logo.svg';
@@ -13,43 +15,111 @@ import arriveSvg     from '../assets/img/arrive.svg';
 import searchSvg     from '../assets/img/search.svg';
 
 
-// ── Mock data (même que PHP) ───────────────────────────
-const mockVoyages: Voyage[] = [
-  { _id: 'm1', depart: 'Paris', arriver: 'Lyon', date_depart: '06:47', temps_arriver: '1h 55', prix: 29, num: 'TGV 6601' },
-  { _id: 'm2', depart: 'Paris', arriver: 'Lyon', date_depart: '08:01', temps_arriver: '1h 58', prix: 35, num: 'TGV 6603' },
-  { _id: 'm3', depart: 'Paris', arriver: 'Lyon', date_depart: '10:15', temps_arriver: '1h 55', prix: 42, num: 'TGV 6607' },
-  { _id: 'm4', depart: 'Paris', arriver: 'Lyon', date_depart: '12:30', temps_arriver: '1h 55', prix: 29, num: 'TGV 6611' },
-  { _id: 'm5', depart: 'Paris', arriver: 'Lyon', date_depart: '14:47', temps_arriver: '2h 03', prix: 55, num: 'TGV 6615' },
-];
-
-
 // ── Helpers ────────────────────────────────────────────
-const today = new Date().toISOString().split('T')[0];
-const dayAfter = new Date(Date.now() + 2 * 86400000).toISOString().split('T')[0];
+const getLocalYMD = (date: Date) => {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const d = String(date.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+};
+
+const todayDate = new Date();
+const today = getLocalYMD(todayDate);
+
+const dayAfterDate = new Date();
+dayAfterDate.setDate(todayDate.getDate() + 2);
+const dayAfter = getLocalYMD(dayAfterDate);
+
 const formatTime = (s: number) =>
   `${Math.floor(s / 60).toString().padStart(2, '0')}:${(s % 60).toString().padStart(2, '0')}`;
 
 
 export default function Tickets(){
-    const [voyages, setVoyages]         = useState<Voyage[]>(mockVoyages);
+    const [voyages, setVoyages]         = useState<Voyage[]>([]);
     const [selected, setSelected]       = useState<SelectedTrain | null>(null);
     const [cartAdded, setCartAdded]     = useState<string | null>(null);
     const [expandedId, setExpandedId]   = useState<string | null>(null);
     const [timerSec, setTimerSec]       = useState(900);
     const [sessionExp, setSessionExp]   = useState(false);
+
+    const [searchDate, setSearchDate]   = useState<string>(today);
+    const [isLoading, setIsLoading]     = useState<boolean>(true);
+
     const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-    useEffect(() => { 
-        fetch('http://localhost:8000/api_voyages.php')
-            .then(r => r.json())
-            .then(data => {
-                if(data.status === 'success'){
-                    setVoyages([...data.data, ...mockVoyages]);
-                }
-            })
-        .catch(() => {})
-    }, []);
+    //Dowload data from Navitia
+    useEffect(() => {
+        const fetchJourneys = async () => {
+            setIsLoading(true); // On loader
+            setVoyages([]); // Clear old result
 
+            const proxyUrl = "http://yevhensrv.alwaysdata.net/navitia.php";
+            
+            const fromId = "admin:fr:75056"; // Paris
+            const toId = "admin:fr:69123";   // Lyon
+            
+            //Format date for Navitia
+            const isToday = searchDate === today;
+            let timeStr = "000000";
+
+            //if we seaching for today, take curent time
+            if (isToday){
+                const now = new Date();
+                timeStr = `${now.getHours().toString().padStart(2, '0')}${now.getMinutes().toString().padStart(2, '0')}00`
+            }
+
+            const dateParam = searchDate.replace(/-/g, '');
+            const datetime = `${dateParam}T${timeStr}`; 
+
+            try {
+                // Do ask for journeys, max 50 for taking all day
+                const response = await fetch(`${proxyUrl}?endpoint=coverage/sncf/journeys&from=${fromId}&to=${toId}&datetime=${datetime}&min_nb_journeys=50`);
+                const data = await response.json();
+
+                if (data.journeys) {
+                    // Show only the trains for day chosed
+                    const filterJourneys = data.journeys.filter((j: any) => j.departure_date_time.startsWith(dateParam));
+
+
+                    const navitiaVoyages: Voyage[] = filterJourneys.map((j: any, index: number) => {
+                        
+                        // Search for the public_transport section to get train info
+                        const ptSection = j.sections.find((s: any) => s.type === "public_transport");
+                        const trainNum = ptSection 
+                            ? `${ptSection.display_informations.commercial_mode} ${ptSection.display_informations.headsign}` 
+                            : "TGV INOUI";
+
+                        const depTime = `${j.departure_date_time.substring(9, 11)}:${j.departure_date_time.substring(11, 13)}`;
+
+
+                        const arrTime = `${j.arrival_date_time.substring(9, 11)}:${j.arrival_date_time.substring(11, 13)}`;
+                        
+                        // Calculate duration (from seconds to hours and minutes)
+                        const hours = Math.floor(j.duration / 3600);
+                        const minutes = Math.floor((j.duration % 3600) / 60);
+
+                        return {
+                            _id: `nav_${index}_${j.departure_date_time}`,
+                            depart: "Paris",
+                            arriver: "Lyon",
+                            date_depart: depTime,
+                            temps_arriver: `${hours}h ${minutes.toString().padStart(2, '0')}`,
+                            prix: Math.floor(Math.random() * 60) + 30, 
+                            num: trainNum
+                        };
+                    });
+
+                    setVoyages(navitiaVoyages);
+                }
+            } catch (error) {
+                console.error("Error downloading journeys from Navitia:", error);
+            } finally {
+                setIsLoading(false); //off
+            }
+        };
+
+        fetchJourneys();
+    }, [searchDate]);
     useEffect(()=> {
         const reseTimer = () => setTimerSec(900);
         ['click', 'keydown', 'mousemove'].forEach(e => window.addEventListener(e, reseTimer));
@@ -107,6 +177,18 @@ export default function Tickets(){
     const isUrgent  = timerSec <= 30;
     const cartCount = cartAdded ? 1 : 0;
 
+    const calcArrival = (dep: string, duration: string): string => {
+        const [depH, depM] = dep.split(':').map(Number);
+        const match = duration.match(/(\d+)h\s*(\d+)/);
+        if (!match) return dep;
+
+        const durH = parseInt(match[1]);
+        const durM = parseInt(match[2]);
+
+        const totalMin = depH * 60 + depM + durH * 60 + durM;
+        
+        return `${Math.floor(totalMin / 60) % 24}`.padStart(2, '0') + ':' + `${totalMin % 60}`.padStart(2, '0');
+    };
 
     return (
         <div className="tickets-page">
@@ -150,13 +232,13 @@ export default function Tickets(){
                     <span className="spf-icon"><img src={arriveSvg} alt="" /></span>
                     <div className="spf-inner">
                     <div className="spf-lbl">Arrivée</div>
-                    <div className="spf-val"><input type="text" defaultValue="Bruxelles" /></div>
+                    <div className="spf-val"><input type="text" defaultValue="Lyon" /></div>
                     </div>
                 </div>
                 <div className="spf">
                     <div className="spf-inner">
                     <div className="spf-lbl">Aller</div>
-                    <div className="spf-val"><input type="date" defaultValue={today} /></div>
+                    <div className="spf-val"><input type="date" value={searchDate} min={today} onChange={(e) => setSearchDate(e.target.value)}/></div>
                     </div>
                 </div>
                 <div className="sp-divider"></div>
@@ -216,108 +298,67 @@ export default function Tickets(){
                 </div>
                 </aside>
 
-                {/* RÉSULTATS */}
+               {/* RÉSULTATS */}
                 <div className="results">
-                <div className="results-header">
-                    <div className="results-count">
-                    <strong>{voyages.length}</strong> trajets trouvés
+                    <div className="results-header">
+                        <div className="results-count">
+                        <strong>{voyages?.length || 0}</strong> trajets trouvés
+                        </div>
+                        <div className="sort-wrap">
+                        Trier par :
+                        <select className="sort-select">
+                            <option>Prix croissant</option>
+                            <option>Départ le plus tôt</option>
+                        </select>
+                        </div>
                     </div>
-                    <div className="sort-wrap">
-                    Trier par :
-                    <select className="sort-select">
-                        <option>Prix croissant</option>
-                        <option>Départ le plus tôt</option>
-                    </select>
-                    </div>
+
+                
+                    <DateStrip 
+                        selectedDate={searchDate} 
+                        onSelectDate={(newDate) => setSearchDate(newDate)} 
+                    />
+
+                    {/* Showing */}
+                    {isLoading ? (
+                        <div style={{ padding: '60px 20px', textAlign: 'center', color: 'var(--gray)' }}>
+                            <div style={{ fontSize: '2rem', marginBottom: '10px' }}>🚆</div>
+                            <p>Recherche des meilleurs trajets en cours...</p>
+                        </div>
+                    ) : voyages.length === 0 ? (
+                        <div style={{ 
+                            padding: '60px 20px', 
+                            textAlign: 'center', 
+                            background: 'var(--white)', 
+                            borderRadius: '14px', 
+                            border: '1.5px solid #ede8df',
+                            marginTop: '20px'
+                        }}>
+                            <h3 style={{ color: 'var(--navy)', marginBottom: '10px', fontSize: '1.2rem' }}>
+                                Aucun train disponible
+                            </h3>
+                            <p style={{ color: 'var(--gray)', fontSize: '0.9rem', lineHeight: '1.6' }}>
+                                Il n'y a plus de trains disponibles pour cette date ou l'heure est déjà passée. <br/>
+                                Veuillez sélectionner un autre jour dans le calendrier.
+                            </p>
+                        </div>
+                    ) : (
+                        voyages.map(v => (
+                            <TrainCard
+                                key={v._id}
+                                voyage={v}
+                                isSelected={selected?.trainId === v._id}
+                                selectedClass={selected?.trainId === v._id ? selected.cls : undefined}
+                                isAdded={cartAdded === v._id}
+                                isExpanded={expandedId === v._id}
+                                onSelectClass={selectClass}
+                                onAddToCart={addToCart}
+                                onToggleExpand={() => setExpandedId(expandedId === v._id ? null : v._id)}
+                                calcArrival={calcArrival}
+                            />
+                        ))
+                    )}
                 </div>
-
-                {voyages.map(v => {
-                    const trainNum   = v.num ?? `TGV INOUI № ${v._id.slice(-4)}`;
-                    const isSelected = selected?.trainId === v._id;
-                    const isAdded    = cartAdded === v._id;
-                    const isExpanded = expandedId === v._id;
-
-                    return (
-                    <div key={v._id} className={`train-card${isAdded ? ' selected' : ''}`}>
-                        <div className="train-card-main">
-
-                        <div className="train-number">
-                            <div className="train-label">Train</div>
-                            <div className="train-num-badge">{trainNum}</div>
-                        </div>
-
-                        <div className="train-timeline">
-                            <div className="train-time">
-                            <div className="train-hour">{v.date_depart}</div>
-                            <div className="train-station">{v.depart}</div>
-                            </div>
-                            <div className="train-line">
-                            <div className="train-duration">{v.temps_arriver}</div>
-                            <div className="train-track"></div>
-                            <div className="train-direct" style={{ color: '#2d9e6b' }}>✓ Direct</div>
-                            </div>
-                            <div className="train-time">
-                            <div className="train-hour">Arrivée</div>
-                            <div className="train-station">{v.arriver}</div>
-                            </div>
-                        </div>
-
-                        <div className="train-classes">
-                            <div
-                            className={`class-btn${isSelected && selected?.cls === '2' ? ' selected' : ''}`}
-                            onClick={() => selectClass(v, '2')}
-                            >
-                            <div className="class-label">Classe</div>
-                            <div className="class-name">2ème</div>
-                            <div className="class-price">{v.prix}€</div>
-                            <div className="class-seats" style={{ color: '#2d9e6b' }}>Places dispo.</div>
-                            </div>
-                            <div
-                            className={`class-btn${isSelected && selected?.cls === '1' ? ' selected' : ''}`}
-                            onClick={() => selectClass(v, '1')}
-                            >
-                            <div className="class-label">Classe</div>
-                            <div className="class-name">1ère</div>
-                            <div className="class-price">{Math.round(v.prix * 2.2)}€</div>
-                            <div className="class-seats" style={{ color: '#2d9e6b' }}>Places dispo.</div>
-                            </div>
-                        </div>
-
-                        <button
-                            className="train-add-btn"
-                            onClick={() => addToCart(v._id)}
-                            disabled={!isSelected || isAdded}
-                            style={{ opacity: isSelected ? 1 : 0.4, cursor: isSelected ? 'pointer' : 'not-allowed' }}
-                        >
-                            {isAdded ? '✓ Ajouté' : 'Ajouter →'}
-                        </button>
-                        </div>
-
-                        <button
-                        className="expand-toggle"
-                        onClick={() => setExpandedId(isExpanded ? null : v._id)}
-                        >
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
-                            style={{ transform: isExpanded ? 'rotate(180deg)' : '' }}>
-                            <polyline points="6 9 12 15 18 9" />
-                        </svg>
-                        Voir les services inclus
-                        </button>
-
-                        {isExpanded && (
-                        <div className="train-card-expand open">
-                            <div className="options-tags">
-                            <span className="option-tag">🍽️ Restauration à bord</span>
-                            <span className="option-tag">📶 WiFi gratuit</span>
-                            <span className="option-tag">🚿 WC disponibles</span>
-                            </div>
-                        </div>
-                        )}
-                    </div>
-                    );
-                })}
-                </div>
-
                 {/* PANIER */}
                 <aside className="cart-panel">
                 <div className="cart-title">
