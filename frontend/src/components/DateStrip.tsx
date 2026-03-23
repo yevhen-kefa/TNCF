@@ -5,14 +5,16 @@ interface DateStringProps {
     onSelectDate: (date: string) => void;
 }
 
-const getMockMinPrice = (dateStr : string) => {
-    let hash = 0;
-    for(let i = 0; i < dateStr.length; i++){
-        hash = dateStr.charCodeAt(i) + ((hash << 5) - hash);
-    }
-    return Math.abs(hash) % 40 + 19;
+export const getMinPriceForDate = (dateStr: string) => {
+  let hash = 0;
+  for (let i = 0; i < dateStr.length; i++) {
+    hash = dateStr.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  // Generates a base price between 29€ and 68€ based on the date string
+  return Math.abs(hash) % 20 + 19; 
 };
 
+// Helper to format date safely
 const getLocalYMD = (date: Date) => {
     const y = date.getFullYear();
     const m = String(date.getMonth() + 1).padStart(2, '0');
@@ -53,7 +55,7 @@ export default function DateStrip({selectedDate, onSelectDate}: DateStringProps)
             res.push({
                 dateStr,
                 label: formattedDate,
-                price: getMockMinPrice(dateStr)
+                price: getMinPriceForDate(dateStr)
             });
                 }
         return res;

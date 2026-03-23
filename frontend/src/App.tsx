@@ -5,6 +5,8 @@ import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import Tickets from './pages/Tickets';
+import Account from './pages/Account';
+
 
 export default function App() {
   return (
@@ -27,6 +29,9 @@ export default function App() {
                 <Link to="/tickets" style={{ padding: '10px 20px', background: '#d452e0', color: 'white', textDecoration: 'none', borderRadius: '5px' }}>
                   Teste Tickets
                 </Link>
+                <Link to="/account" style={{ padding: '10px 20px', background: '#52e07d', color: 'white', textDecoration: 'none', borderRadius: '5px' }}>
+                  Account
+                </Link>
               </div>
             </div>
           } 
@@ -36,6 +41,7 @@ export default function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path='/tickets' element={<Tickets/>}/>
+        <Route path='/account' element={<Account/>}/>
       </Routes>
     </Router>
   );

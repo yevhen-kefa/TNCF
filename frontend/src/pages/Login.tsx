@@ -40,6 +40,7 @@ export default function Login(){
             const response = await fetch('http://localhost:8000/api_login.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
                 body: JSON.stringify({ mail: email, pass: pass })
             });
             const data = await response.json();
@@ -69,7 +70,7 @@ export default function Login(){
                 <div className="left-content">
                     <div className="brand">
                     <div className="brand-logo">
-                        <img src={logoSvg} alt="" />
+                        <a href="/"><img src={logoSvg} alt="" /></a>
                     </div>
                     </div>
 
@@ -78,15 +79,15 @@ export default function Login(){
                     <p>Réservez vos billets TGV en quelques clics. Confort, rapidité et sérénité pour tous vos déplacements.</p>
                     <div className="stats">
                         <div className="stat-item">
-                        <div className="stat-num">320</div>
+                        <div className="stat-num-login">320</div>
                         <div className="stat-label">km/h max</div>
                         </div>
                         <div className="stat-item">
-                        <div className="stat-num">200+</div>
+                        <div className="stat-num-login">200+</div>
                         <div className="stat-label">destinations</div>
                         </div>
                         <div className="stat-item">
-                        <div className="stat-num">99%</div>
+                        <div className="stat-num-login">99%</div>
                         <div className="stat-label">ponctualité</div>
                         </div>
                     </div>

@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import type { Voyage } from "../Voyage";
 import type { SelectedTrain } from "../SelectedTrain";
 import TrainCard from "../components/TrainCard";
-import DateStrip from "../components/DateStrip";
+import DateStrip, { getMinPriceForDate } from "../components/DateStrip";
 import '../assets/style/ticket.css'
 
 import logoSvg       from '../assets/img/logo.svg';
@@ -90,13 +90,16 @@ export default function Tickets(){
                             : "TGV INOUI";
 
                         const depTime = `${j.departure_date_time.substring(9, 11)}:${j.departure_date_time.substring(11, 13)}`;
-
-
                         const arrTime = `${j.arrival_date_time.substring(9, 11)}:${j.arrival_date_time.substring(11, 13)}`;
                         
                         // Calculate duration (from seconds to hours and minutes)
                         const hours = Math.floor(j.duration / 3600);
                         const minutes = Math.floor((j.duration % 3600) / 60);
+
+                        const basePriceForDay = getMinPriceForDate(searchDate);
+                        const timeVariation = (index % 5) * 4; // Adds 0€, 4€, 8€, 12€, or 16€
+                        
+                        const finalPrice = basePriceForDay + timeVariation;
 
                         return {
                             _id: `nav_${index}_${j.departure_date_time}`,
@@ -104,7 +107,7 @@ export default function Tickets(){
                             arriver: "Lyon",
                             date_depart: depTime,
                             temps_arriver: `${hours}h ${minutes.toString().padStart(2, '0')}`,
-                            prix: Math.floor(Math.random() * 60) + 30, 
+                            prix: finalPrice, 
                             num: trainNum
                         };
                     });
@@ -200,6 +203,11 @@ export default function Tickets(){
                     <img src={logoSvg} alt="TNCF" />
                 </div>
                 </a>
+                <ul className="nav-links">
+                    <li><a href="/">Voyager</a></li>
+                    <li><a href="/tickets" className="active">Billets</a></li>
+                    <li><a href="/account">Compte</a></li>
+                </ul>
                 <div className="topbar-actions">
                 <div className="session-timer-top">
                     <img src={clockSvg} alt="" />
