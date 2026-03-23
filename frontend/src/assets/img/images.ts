@@ -1,12 +1,12 @@
 import alertSvg  from './alert.svg';
-import arrivSvg  from './arrive.svg';
+import arriveSvg  from './arrive.svg';
 import arrowLeftSvg  from './arrow_l.svg';
 import arrowRightSvg  from './arrow_r.svg';
 import boxGoldSvg  from './box_g.svg';
 import boxSvg    from './box.svg';
 import cartSvg   from './cart.svg';
 import clockSvg  from './clock.svg';
-import deparSvg  from './depart.svg';
+import departSvg  from './depart.svg';
 import layerSvg  from './layer.svg';
 import logoSvg   from './logo.svg';
 import mailGSvg  from './mail_gold.svg';
@@ -22,14 +22,14 @@ import tickeSvg  from './ticket.svg';
 
 export{
     alertSvg,
-    arrivSvg,
+    arriveSvg,
     arrowLeftSvg,
     arrowRightSvg,
     boxGoldSvg,
     boxSvg,
     cartSvg,
     clockSvg,
-    deparSvg,
+    departSvg,
     layerSvg,
     logoSvg,
     mailGSvg,

@@ -9,9 +9,7 @@ import '../assets/style/booking.css';
 import '../assets/img/images';
 import { boxSvg, clockSvg, logoSvg, persoWhiteSvg } from "../assets/img/images";
 
-
-
-type PaymentMethod = 'card' | 'patpal' | '';
+type PaymentMethod = 'card';
 type SeatOption = 'none' | 'window' | 'aisle' | 'quiet'
 
 interface BaggageOptions {
@@ -42,9 +40,16 @@ export default function Booking() {
     telephone: '',
   });
 
+  const [cardDetails, setCardDetails] = useState({
+    name: '',
+    number: '',
+    expiry: '',
+    cvv: ''
+  });
+
   const [seat, setSeat] = useState<SeatOption>('none');
   const [baggage, setBaggage] = useState<BaggageOptions>({ extra: 0, special: 0 });
-  const [payment, setPayment] = useState<PaymentMethod>('');
+  const [payment] = useState<PaymentMethod>('card');
   const [message, setMessage] = useState<{ text: string; type: 'error' | 'success' | '' }>({ text: '', type: '' });
   const [isLoading, setIsLoading] = useState(false);
 
@@ -69,6 +74,11 @@ export default function Booking() {
     setContact(prev => ({ ...prev, [name]: value }));
   };
 
+  const handleCardChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setCardDetails(prev => ({ ...prev, [name]: value }));
+  };
+
   const handleSubmit = async () => {
     // Validation
     if (!passenger.prenom || !passenger.nom) {
@@ -79,8 +89,8 @@ export default function Booking() {
       setMessage({ text: 'Veuillez entrer votre adresse e-mail.', type: 'error' });
       return;
     }
-    if (!payment) {
-      setMessage({ text: 'Veuillez choisir un mode de paiement.', type: 'error' });
+    if (!cardDetails.name || !cardDetails.number || !cardDetails.expiry || !cardDetails.cvv) {
+      setMessage({ text: 'Veuillez remplir tous les champs de la carte bancaire.', type: 'error' });
       return;
     }
 
@@ -93,6 +103,11 @@ export default function Booking() {
       seat,
       baggage,
       payment,
+      cardDetails: {
+          name: cardDetails.name,
+          number: cardDetails.number.replace(/\s/g, ''),
+          expiry: cardDetails.expiry
+      },
       train,
       total,
     };
@@ -135,11 +150,6 @@ export default function Booking() {
             Session expire dans
             <span className="timer-count">{timerStr}</span>
           </div>
-          <a href="#" className="cart-btn">
-            <img src={boxSvg} alt="" />
-            Panier
-            <span className="cart-count">1</span>
-          </a>
           <a href="/login" className="cart-btn">
             <img src={persoWhiteSvg} alt="" />
             Connexion
@@ -341,25 +351,67 @@ export default function Booking() {
               <div className="booking-step-num">5</div>
               <h2>Paiement</h2>
             </div>
-            <p className="booking-section-sub">Veuillez choisir une méthode de paiement</p>
+            <p className="booking-section-sub">Saisissez les informations de votre carte bancaire</p>
 
             <div className="booking-payment-options">
-              {[
-                { id: 'card',   label: 'Carte bancaire', icon: '💳' },
-                { id: 'paypal', label: 'PayPal',         icon: '🅿️' },
-              ].map(opt => (
-                <label
-                  key={opt.id}
-                  className={`booking-payment-card${payment === opt.id ? ' selected' : ''}`}
-                  onClick={() => setPayment(opt.id as PaymentMethod)}
-                >
+                <label className="booking-payment-card selected">
                   <div className="booking-payment-radio">
-                    <div className={`booking-payment-dot${payment === opt.id ? ' active' : ''}`}></div>
+                    <div className="booking-payment-dot active"></div>
                   </div>
-                  <span className="booking-payment-icon">{opt.icon}</span>
-                  <span className="booking-payment-label">{opt.label}</span>
+                  <span className="booking-payment-icon">💳</span>
+                  <span className="booking-payment-label">Carte bancaire</span>
                 </label>
-              ))}
+            </div>
+
+            <div className="booking-card-form" style={{ marginTop: '20px', padding: '24px', border: '1px solid #ede8df', borderRadius: '12px', background: 'var(--light)' }}>
+              <div className="booking-form-row">
+                <div className="booking-form-group">
+                  <label className="booking-label">Titulaire de la carte *</label>
+                  <input
+                    className="booking-input"
+                    type="text" name="name"
+                    placeholder="Jean Dupont"
+                    value={cardDetails.name}
+                    onChange={handleCardChange}
+                  />
+                </div>
+              </div>
+              
+              <div className="booking-form-row" style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
+                <div className="booking-form-group" style={{ flex: '2 1 200px' }}>
+                  <label className="booking-label">Numéro de carte *</label>
+                  <input
+                    className="booking-input"
+                    type="text" name="number"
+                    placeholder="0000 0000 0000 0000"
+                    maxLength={19}
+                    value={cardDetails.number}
+                    onChange={handleCardChange}
+                  />
+                </div>
+                <div className="booking-form-group" style={{ flex: '1 1 80px' }}>
+                  <label className="booking-label">Expiration *</label>
+                  <input
+                    className="booking-input"
+                    type="text" name="expiry"
+                    placeholder="MM/AA"
+                    maxLength={5}
+                    value={cardDetails.expiry}
+                    onChange={handleCardChange}
+                  />
+                </div>
+                <div className="booking-form-group" style={{ flex: '1 1 80px' }}>
+                  <label className="booking-label">CVC *</label>
+                  <input
+                    className="booking-input"
+                    type="text" name="cvv"
+                    placeholder="123"
+                    maxLength={4}
+                    value={cardDetails.cvv}
+                    onChange={handleCardChange}
+                  />
+                </div>
+              </div>
             </div>
           </div>
 

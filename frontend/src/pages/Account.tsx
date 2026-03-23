@@ -1,20 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import '../assets/style/count.css';
+import '../assets/img/images';
+import { alertSvg, arriveSvg, arrowLeftSvg, arrowRightSvg, boxGoldSvg, cartSvg, departSvg, layerSvg, logoSvg, mailSvg, passSvg, persoWhiteSvg, shielSvg, tickeSvg } from '../assets/img/images';
 
-import logoSvg from '../assets/img/logo.svg';
-import mailSvg from '../assets/img/mail.svg';
-import passSvg from '../assets/img/pass.svg';
-import shieldSvg from '../assets/img/shield.svg';
-import personWhiteSvg from '../assets/img/person_white.svg';
-import ticketSvg from '../assets/img/ticket.svg';
-import cartSvg from '../assets/img/cart.svg';
-import boxGSvg from '../assets/img/box_g.svg';
-import alertSvg from '../assets/img/alert.svg';
-import layerSvg from '../assets/img/layer.svg';
-import arriveSvg from '../assets/img/arrive.svg';
-import departSvg from '../assets/img/depart.svg';
-import arrowLSvg from '../assets/img/arrow_l.svg';
-import arrowRSvg from '../assets/img/arrow_r.svg';
 
 export default function Account() {
   const [userFullName, setUserFullName] = useState('Chargement... ');
@@ -162,7 +150,7 @@ export default function Account() {
                 Membre Gold
               </span>
               <span className="profile-badge badge-verified">
-                <img src={shieldSvg} alt="" />
+                <img src={shielSvg} alt="" />
                 Compte vérifié
               </span>
             </div>
@@ -186,7 +174,7 @@ export default function Account() {
 
           {/* Bouton modifier */}
           <a href="#" className="btn-edit">
-            <img src={personWhiteSvg} alt="" />
+            <img src={persoWhiteSvg} alt="" />
             Modifier le profil
           </a>
         </div>
@@ -195,7 +183,7 @@ export default function Account() {
         <div className="account-grid">
           <a href="#" className="account-menu-card">
             <div className="menu-card-icon">
-              <img src={ticketSvg} alt="" />
+              <img src={tickeSvg} alt="" />
             </div>
             <div className="menu-card-text">
               <h4>Mes Réservations</h4>
@@ -221,7 +209,7 @@ export default function Account() {
 
           <a href="#" className="account-menu-card">
             <div className="menu-card-icon">
-              <img src={boxGSvg} alt="" />
+              <img src={boxGoldSvg} alt="" />
             </div>
             <div className="menu-card-text">
               <h4>Mes avantages</h4>
@@ -247,7 +235,7 @@ export default function Account() {
 
           <a href="#" className="account-menu-card">
             <div className="menu-card-icon">
-              <img src={shieldSvg} alt="" />
+              <img src={shielSvg} alt="" />
             </div>
             <div className="menu-card-text">
               <h4>Sécurité</h4>
@@ -288,7 +276,7 @@ export default function Account() {
             onClick={() => scrollByAmount(-310)}
             style={{ opacity: atStart ? 0.35 : 1, pointerEvents: atStart ? 'none' : 'auto' }}
           >
-            <img src={arrowLSvg} alt="←" />
+            <img src={arrowLeftSvg} alt="←" />
           </button>
 
           <div
@@ -526,7 +514,7 @@ export default function Account() {
             onClick={() => scrollByAmount(310)}
             style={{ opacity: atEnd ? 0.35 : 1, pointerEvents: atEnd ? 'none' : 'auto' }}
           >
-            <img src={arrowRSvg} alt="→" />
+            <img src={arrowRightSvg} alt="→" />
           </button>
         </div>
 
