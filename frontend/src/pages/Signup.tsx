@@ -1,15 +1,9 @@
 import React, { useState } from 'react';
+
+import '../assets/img/images';
  import '../assets/style/singup.css'; 
 import type { FormData } from '../FormData';
-
-
-import logoSvg from "../assets/img/logo.svg";
-import layerSvg from "../assets/img/layer.svg";
-import cartSvg from "../assets/img/cart.svg";
-import mailGoldSvg from "../assets/img/mail_gold.svg";
-import personSvg from "../assets/img/person.svg";
-import mailSvg from "../assets/img/mail.svg";
-import passSvg from "../assets/img/pass.svg";
+import { cartSvg, layerSvg, logoSvg, mailGSvg, mailSvg, passSvg, persoSvg } from '../assets/img/images';
 
 
 interface FormMessage {
@@ -192,7 +186,7 @@ export default function Signup() {
               Paiement mémorisé
             </div>
             <div className="benefit-item">
-              <div className="benefit-icon"><img src={mailGoldSvg} alt="" /></div>
+              <div className="benefit-icon"><img src={mailGSvg} alt="" /></div>
               Alertes SMS
             </div>
           </div>
@@ -215,14 +209,14 @@ export default function Signup() {
             <div className="form-group">
               <label className="form-label">Prénom</label>
               <div className="input-wrap">
-                <span className="input-icon"><img src={personSvg} alt="" /></span>
+                <span className="input-icon"><img src={persoSvg} alt="" /></span>
                 <input className="form-input" type="text" id="prenom" placeholder="Jean" value={formData.prenom} onChange={handleChange} />
               </div>
             </div>
             <div className="form-group">
               <label className="form-label">Nom de famille</label>
               <div className="input-wrap">
-                <span className="input-icon"><img src={personSvg} alt="" /></span>
+                <span className="input-icon"><img src={persoSvg} alt="" /></span>
                 <input className="form-input" type="text" id="nom" placeholder="Dupont" value={formData.nom} onChange={handleChange} />
               </div>
             </div>

@@ -6,6 +6,7 @@ import Login from './pages/Login';
 import Signup from './pages/Signup';
 import Tickets from './pages/Tickets';
 import Account from './pages/Account';
+import Booking from './pages/Booking';
 
 
 export default function App() {
@@ -42,6 +43,7 @@ export default function App() {
         <Route path="/signup" element={<Signup />} />
         <Route path='/tickets' element={<Tickets/>}/>
         <Route path='/account' element={<Account/>}/>
+        <Route path="/booking" element={<Booking />} />
       </Routes>
     </Router>
   );

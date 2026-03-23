@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import type { Voyage } from "../Voyage";
 import type { SelectedTrain } from "../SelectedTrain";
 import TrainCard from "../components/TrainCard";
@@ -23,6 +24,7 @@ const getLocalYMD = (date: Date) => {
     return `${y}-${m}-${d}`;
 };
 
+
 const todayDate = new Date();
 const today = getLocalYMD(todayDate);
 
@@ -46,6 +48,9 @@ export default function Tickets(){
     const [isLoading, setIsLoading]     = useState<boolean>(true);
 
     const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+    const navigate = useNavigate();
+
 
     //Dowload data from Navitia
     useEffect(() => {
@@ -390,36 +395,40 @@ export default function Tickets(){
                     </div>
                 ) : (
                     <div className="cart-items">
-                    <div className="cart-item">
-                        <div className="cart-item-header">
-                        <div className="cart-item-route">
-                            {selected.from} → {selected.to}
-                            <span style={{ fontSize: '0.7rem', color: 'var(--gray)', fontWeight: 400 }}> (Aller)</span>
+                        <div className="cart-item">
+                            <div className="cart-item-header">
+                            <div className="cart-item-route">
+                                {selected.from} → {selected.to}
+                                <span style={{ fontSize: '0.7rem', color: 'var(--gray)', fontWeight: 400 }}> (Aller)</span>
+                            </div>
+                            <button className="cart-item-remove" onClick={removeCart}>✕</button>
+                            </div>
+                            <div className="cart-item-details">
+                            <div>{selected.num} · {selected.dep}</div>
+                            <div>{selected.cls === '1' ? '1ère' : '2ème'} classe · 1 voyageur</div>
+                            <div style={{ color: 'var(--navy)', fontWeight: 600, marginTop: 4 }}>{selected.price}€</div>
+                            </div>
                         </div>
-                        <button className="cart-item-remove" onClick={removeCart}>✕</button>
-                        </div>
-                        <div className="cart-item-details">
-                        <div>{selected.num} · {selected.dep}</div>
-                        <div>{selected.cls === '1' ? '1ère' : '2ème'} classe · 1 voyageur</div>
-                        <div style={{ color: 'var(--navy)', fontWeight: 600, marginTop: 4 }}>{selected.price}€</div>
-                        </div>
-                    </div>
 
-                    <div className="cart-totals">
-                        <div className="total-row"><span>Billet</span><span>{selected.price}€</span></div>
-                        <div className="total-row main"><span>Total</span><span>{selected.price}€</span></div>
-                    </div>
+                        <div className="cart-totals">
+                            <div className="total-row"><span>Billet</span><span>{selected.price}€</span></div>
+                            <div className="total-row main"><span>Total</span><span>{selected.price}€</span></div>
+                        </div>
 
-                    <button className="btn-checkout">
-                        Procéder au paiement
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M5 12h14M12 5l7 7-7 7" />
-                        </svg>
-                    </button>
+                        <button
+                            className="btn-checkout"
+                            onClick={() => navigate('/booking', { state: { train: selected } })}
+                            >
+                            Procéder au paiement
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <path d="M5 12h14M12 5l7 7-7 7" />
+                            </svg>
+                        </button>
                     </div>
                 )}
                 </aside>
             </div>
+
 
             {/* SESSION MODAL */}
             {sessionExp && (
