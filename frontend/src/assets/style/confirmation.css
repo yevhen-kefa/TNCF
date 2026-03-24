@@ -1,0 +1,353 @@
+@import './header.css';
+
+/* ════════════════════════════════════════════════
+   confirmation.css  —  Page de confirmation TNCF
+════════════════════════════════════════════════ */
+
+/* ── PAGE ── */
+.confirmation-page {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--light);
+  min-height: 100vh;
+}
+
+/* ── BODY ── */
+.confirmation-body {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 56px 24px 80px;
+  text-align: center;
+}
+
+/* ── ICÔNE SUCCÈS ── */
+.confirmation-success-icon {
+  width: 72px;
+  height: 72px;
+  background: linear-gradient(135deg, var(--navy), var(--blue));
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  color: var(--gold);
+  margin: 0 auto 28px;
+  box-shadow: 0 8px 32px rgba(10, 22, 40, 0.2);
+}
+
+/* ── TITRES ── */
+.confirmation-eyebrow {
+  font-size: 0.72rem;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--gold);
+  font-weight: 500;
+  margin-bottom: 12px;
+}
+
+.confirmation-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 2.4rem;
+  font-weight: 700;
+  color: var(--navy);
+  margin-bottom: 14px;
+  line-height: 1.15;
+}
+
+.confirmation-subtitle {
+  font-size: 0.95rem;
+  color: var(--gray);
+  font-weight: 300;
+  line-height: 1.7;
+  margin-bottom: 40px;
+}
+
+.confirmation-subtitle strong {
+  color: var(--navy);
+  font-weight: 500;
+}
+
+/* ════════════════════
+   CARTE DU BILLET
+════════════════════ */
+.confirmation-card {
+  background: var(--white);
+  border-radius: 20px;
+  border: 1px solid #f0ece4;
+  box-shadow: 0 4px 40px rgba(10, 22, 40, 0.07);
+  overflow: hidden;
+  margin-bottom: 32px;
+  text-align: left;
+}
+
+/* En-tête sombre */
+.confirmation-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24px 32px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  background: linear-gradient(135deg, #0a1628, #1a3a6e);
+}
+
+.confirmation-order-label {
+  font-size: 0.68rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.45);
+  margin-bottom: 5px;
+}
+
+.confirmation-order-num {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--gold);
+  letter-spacing: 1px;
+}
+
+.confirmation-badge {
+  padding: 6px 14px;
+  background: rgba(45, 158, 107, 0.2);
+  border: 1px solid rgba(45, 158, 107, 0.4);
+  border-radius: 100px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #4dbe8a;
+  letter-spacing: 0.5px;
+  flex-shrink: 0;
+}
+
+/* ── TRAJET VISUEL ── */
+.confirmation-ticket {
+  display: flex;
+  align-items: center;
+  padding: 32px;
+  gap: 16px;
+  border-bottom: 1px dashed #e8e2d8;
+}
+
+.confirmation-station {
+  flex: 1;
+}
+
+.confirmation-station-right {
+  text-align: right;
+}
+
+.confirmation-time {
+  font-family: 'Playfair Display', serif;
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--navy);
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.confirmation-city {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--navy);
+  margin-bottom: 2px;
+}
+
+.confirmation-station-label {
+  font-size: 0.73rem;
+  color: var(--gray);
+  font-weight: 300;
+}
+
+/* Ligne centrale */
+.confirmation-line {
+  flex: 2;
+  text-align: center;
+}
+
+.confirmation-train-num {
+  display: inline-block;
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--gold);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  background: rgba(201, 168, 76, 0.08);
+  border: 1px solid rgba(201, 168, 76, 0.25);
+  padding: 3px 10px;
+  border-radius: 100px;
+  margin-bottom: 10px;
+}
+
+.confirmation-track {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.confirmation-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--navy);
+  flex-shrink: 0;
+}
+
+.confirmation-rail {
+  flex: 1;
+  height: 2px;
+  background: linear-gradient(90deg, var(--navy), var(--gold), var(--navy));
+}
+
+.confirmation-direct {
+  font-size: 0.75rem;
+  color: var(--green);
+  font-weight: 500;
+}
+
+/* ── DÉTAILS PASSAGER ── */
+.confirmation-details {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.confirmation-detail-item {
+  padding: 20px 28px;
+  border-right: 1px solid #f0ece4;
+}
+
+.confirmation-detail-item:last-child {
+  border-right: none;
+}
+
+.confirmation-detail-label {
+  font-size: 0.68rem;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--gray);
+  font-weight: 500;
+  margin-bottom: 6px;
+}
+
+.confirmation-detail-value {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--navy);
+}
+
+.confirmation-price {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.15rem;
+  color: var(--gold);
+}
+
+/* ════════════════════
+   ACTIONS
+════════════════════ */
+.confirmation-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: stretch;
+}
+
+/* Bouton PDF principal */
+.confirmation-btn-pdf {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 16px 32px;
+  background: var(--navy);
+  color: var(--white);
+  border: none;
+  border-radius: 10px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: all 0.25s;
+}
+
+.confirmation-btn-pdf:hover {
+  background: var(--blue);
+  transform: translateY(-1px);
+  box-shadow: 0 8px 24px rgba(10, 22, 40, 0.2);
+}
+
+.confirmation-btn-pdf:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.confirmation-btn-icon {
+  font-size: 1rem;
+}
+
+/* Bouton secondaire */
+.confirmation-btn-secondary {
+  padding: 14px 32px;
+  background: transparent;
+  color: var(--blue);
+  border: 1.5px solid #ddd8cc;
+  border-radius: 10px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.confirmation-btn-secondary:hover {
+  border-color: var(--gold);
+  color: var(--navy);
+}
+
+/* ── ERREUR ── */
+.confirmation-error {
+  margin-top: 20px;
+  padding: 14px 18px;
+  background: rgba(224, 82, 82, 0.07);
+  border: 1px solid rgba(224, 82, 82, 0.3);
+  border-radius: 10px;
+  color: #e05252;
+  font-size: 0.85rem;
+  text-align: left;
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 640px) {
+  .confirmation-title {
+    font-size: 1.8rem;
+  }
+
+  .confirmation-ticket {
+    flex-direction: column;
+    text-align: center;
+    gap: 20px;
+  }
+
+  .confirmation-station-right {
+    text-align: center;
+  }
+
+  .confirmation-details {
+    grid-template-columns: 1fr;
+  }
+
+  .confirmation-detail-item {
+    border-right: none;
+    border-bottom: 1px solid #f0ece4;
+    padding: 16px 24px;
+  }
+
+  .confirmation-detail-item:last-child {
+    border-bottom: none;
+  }
+
+  .confirmation-card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+}

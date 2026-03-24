@@ -1,18 +1,6 @@
-/* ════════════════════════════════════════════════
-   ticket.css  —  Styles spécifiques à tickets.php
-   Dépend de header.css (variables, reset, topbar, nav)
-════════════════════════════════════════════════ */
 
 @import url('header.css');
 
-
-/* ════════════════════════════════════════════════
-   SEARCH PANEL
-   Barre sticky sous le topbar avec :
-     • ligne 1 : titre de la route
-     • ligne 2 : champs de recherche
-     • ligne 3 : chips de filtre
-════════════════════════════════════════════════ */
 
 .search-panel {
   background: var(--navy);
@@ -1117,4 +1105,34 @@ input[type="range"] {
   z-index: 9999;
   align-items: center;
   justify-content: center;
+}
+
+
+/* --- 1st Class Button Styling --- */
+.class-btn.class-1 {
+  background: linear-gradient(to bottom, #fefbf4, var(--white));
+  border-color: rgba(201, 168, 76, 0.4);
+}
+
+.class-btn.class-1 .class-name {
+  color: #b59336; 
+}
+
+.class-btn.class-1:hover {
+  border-color: var(--gold);
+  background: rgba(201, 168, 76, 0.05);
+}
+
+/* Selected state for 1st class */
+.class-btn.class-1.selected {
+  background: var(--gold);
+  border-color: var(--gold);
+}
+
+/* Force text to navy for better contrast on gold background */
+.class-btn.class-1.selected .class-label,
+.class-btn.class-1.selected .class-name,
+.class-btn.class-1.selected .class-price,
+.class-btn.class-1.selected .class-seats {
+  color: var(--navy) !important;
 }

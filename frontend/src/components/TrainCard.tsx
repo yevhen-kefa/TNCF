@@ -43,7 +43,7 @@ export default function TrainCard({
 
         <div className="train-classes">
           <div
-            className={`class-btn${isSelected && selectedClass === '2' ? ' selected' : ''}`}
+            className={`class-btn class-2 ${isSelected && selectedClass === '2' ? ' selected' : ''}`}
             onClick={() => onSelectClass(voyage, '2')}
           >
             <div className="class-label">Classe</div>
@@ -51,8 +51,9 @@ export default function TrainCard({
             <div className="class-price">{voyage.prix}€</div>
             <div className="class-seats" style={{ color: '#2d9e6b' }}>Places dispo.</div>
           </div>
+
           <div
-            className={`class-btn${isSelected && selectedClass === '1' ? ' selected' : ''}`}
+            className={`class-btn class-1 ${isSelected && selectedClass === '1' ? ' selected' : ''}`}
             onClick={() => onSelectClass(voyage, '1')}
           >
             <div className="class-label">Classe</div>

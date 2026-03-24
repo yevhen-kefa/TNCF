@@ -1,0 +1,210 @@
+/* ════════════════════════════════════════════════
+   CARTE BILLET
+════════════════════════════════════════════════ */
+
+.ticket-card {
+  flex-shrink: 0;
+  width: 280px;
+  background: var(--white);
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  overflow: hidden;
+  scroll-snap-align: start;
+  box-shadow: 0 4px 20px rgba(10, 22, 40, 0.07);
+  transition: all 0.3s;
+  position: relative;
+}
+
+.ticket-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 36px rgba(10, 22, 40, 0.13);
+  border-color: rgba(201, 168, 76, 0.4);
+}
+
+/* ── En-tête du billet ── */
+
+.ticket-header {
+  padding: 18px 22px 14px;
+  background: linear-gradient(135deg, var(--navy), var(--blue));
+  position: relative;
+  overflow: hidden;
+}
+
+/* Cercle décoratif */
+.ticket-header::before {
+  content: '';
+  position: absolute;
+  right: -20px;
+  top: -20px;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+/* Tag de classe (coin supérieur droit) */
+.ticket-class-tag {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  padding: 3px 8px;
+  background: rgba(201, 168, 76, 0.2);
+  border: 1px solid rgba(201, 168, 76, 0.4);
+  border-radius: 100px;
+  font-size: 0.6rem;
+  letter-spacing: 1px;
+  color: var(--gold-light);
+  text-transform: uppercase;
+}
+
+/* Numéro de train */
+.ticket-train-num {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.65rem;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 10px;
+}
+
+/* Icône train dans le numéro — teinte dorée */
+.ticket-train-num img {
+  width: 12px;
+  height: 12px;
+  filter: invert(72%) sepia(45%) saturate(400%) hue-rotate(5deg);
+}
+
+/* Route : Ville → Ville */
+.ticket-route {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ticket-city {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--white);
+}
+
+.ticket-arrow-wrap {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 4px;
+}
+
+/* Ligne avec flèche dorée */
+.ticket-arrow-line {
+  width: 100%;
+  height: 1.5px;
+  background: linear-gradient(90deg,
+    rgba(201, 168, 76, 0.3),
+    var(--gold),
+    rgba(201, 168, 76, 0.3));
+  position: relative;
+}
+
+.ticket-arrow-line::after {
+  content: '›';
+  position: absolute;
+  right: -1px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--gold);
+  font-size: 1rem;
+  line-height: 0;
+}
+
+.ticket-dur {
+  font-size: 0.62rem;
+  color: rgba(255, 255, 255, 0.45);
+  margin-top: 4px;
+  letter-spacing: 0.5px;
+}
+
+/* ── Corps du billet ── */
+
+.ticket-body {
+  padding: 16px 22px 18px;
+}
+
+/* Effet perforateur */
+.ticket-punch {
+  display: flex;
+  align-items: center;
+  margin: 0 -22px 16px;
+}
+
+.punch-hole {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--light);
+  border: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.punch-line {
+  flex: 1;
+  border-top: 2px dashed #e8e2d8;
+  margin: 0 2px;
+}
+
+/* Grille de détails 2×2 */
+.ticket-details {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.detail-label {
+  font-size: 0.62rem;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--gray);
+  margin-bottom: 3px;
+}
+
+.detail-value {
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: var(--navy);
+}
+
+/* Pied du billet */
+.ticket-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.ticket-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 100px;
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+.status-used      { background: rgba(10, 22, 40, 0.07);  color: var(--gray);  }
+.status-upcoming  { background: rgba(45, 158, 107, 0.1); color: var(--green); }
+.status-cancelled { background: rgba(224, 82, 82, 0.08); color: #e05252;      }
+
+.ticket-price {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--navy);
+}
+
+@media (max-width: 600px) {
+  .ticket-card  { width: 240px; }
+}

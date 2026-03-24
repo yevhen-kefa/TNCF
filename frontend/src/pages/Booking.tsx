@@ -4,13 +4,15 @@ import { useState } from "react";
 import type { PassengerForm } from "../PassengerForm";
 import type { ContactForm } from "../ContactForm";
 import type { SelectedTrain } from "../SelectedTrain";
+import type { Seat } from '../components/SeatModal'; 
+import SeatMapModal from "../components/SeatModal";
 
 import '../assets/style/booking.css';
 import '../assets/img/images';
 import { boxSvg, clockSvg, logoSvg, persoWhiteSvg } from "../assets/img/images";
 
 type PaymentMethod = 'card';
-type SeatOption = 'none' | 'window' | 'aisle' | 'quiet'
+type SeatMode = 'random' | 'specific'; // New type for seat selection mode
 
 interface BaggageOptions {
   extra: number;
@@ -24,10 +26,10 @@ export default function Booking() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Récupère les données du train depuis Tickets.tsx via navigate state
+  // Retrieves train data from Tickets.tsx via navigate state
   const train = location.state?.train as SelectedTrain | undefined;
 
-  // ── État formulaire ──
+  // ── Form state ──
   const [passenger, setPassenger] = useState<PassengerForm>({
     civilite: 'M',
     prenom: '',
@@ -47,7 +49,10 @@ export default function Booking() {
     cvv: ''
   });
 
-  const [seat, setSeat] = useState<SeatOption>('none');
+  const [seatMode, setSeatMode] = useState<SeatMode>('random');
+  const [isSeatMapOpen, setIsSeatMapOpen] = useState(false);
+  const [specificSeats, setSpecificSeats] = useState<Seat[]>([]);
+  
   const [baggage, setBaggage] = useState<BaggageOptions>({ extra: 0, special: 0 });
   const [payment] = useState<PaymentMethod>('card');
   const [message, setMessage] = useState<{ text: string; type: 'error' | 'success' | '' }>({ text: '', type: '' });
@@ -57,11 +62,11 @@ export default function Booking() {
   const [timerSec] = useState(900);
   const timerStr = formatTime(timerSec);
 
-  // ── Prix ──
-  const seatPrice: Record<SeatOption, number> = { none: 0, window: 5, aisle: 3, quiet: 8 };
+  // ── Price ──
+  const currentSeatPrice = seatMode === 'specific' ? 5 : 0; // +5€ if they want to choose a seat
   const baggagePrice = baggage.extra * 6.49 + baggage.special * 9.99;
   const basePrice = train?.price ?? 0;
-  const total = basePrice + seatPrice[seat] + baggagePrice;
+  const total = basePrice + currentSeatPrice + baggagePrice;
 
   // ── Handlers ──
   const handlePassengerChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -93,14 +98,19 @@ export default function Booking() {
       setMessage({ text: 'Veuillez remplir tous les champs de la carte bancaire.', type: 'error' });
       return;
     }
+    if (seatMode === 'specific' && specificSeats.length === 0) {
+      setMessage({ text: 'Veuillez sélectionner votre place sur le plan interactif.', type: 'error' });
+      return;
+    }
 
     setIsLoading(true);
 
-    // TODO: envoyer à l'API PHP
+    // Payload to send to PHP API
     const payload = {
       passenger,
       contact,
-      seat,
+      seatMode,
+      specificSeats,
       baggage,
       payment,
       cardDetails: {
@@ -121,14 +131,25 @@ export default function Booking() {
       const data = await response.json();
 
       if (data.status === 'success') {
-        setMessage({ text: 'Réservation confirmée ! Redirection...', type: 'success' });
-        setTimeout(() => navigate('/'), 2000);
-      } else {
+        navigate('/confirmation', {
+          state: {
+            booking: {
+              train:       train,
+              passenger:   passenger,
+              contact:     contact,
+              total:       total,
+              orderNumber: data.orderNumber
+                ?? 'TNCF-' + Math.random().toString(36).slice(2, 8).toUpperCase(),
+            }
+          }
+        });
+        return; 
+      }else {
         setMessage({ text: data.message || 'Une erreur est survenue.', type: 'error' });
         setIsLoading(false);
       }
     } catch {
-      // API pas encore prête — simulation succès
+      // API not ready yet — simulating success
       setMessage({ text: 'Réservation confirmée ! (mode démo)', type: 'success' });
       setIsLoading(false);
     }
@@ -160,14 +181,14 @@ export default function Booking() {
       {/* ── BODY ── */}
       <div className="booking-body">
 
-        {/* ── COLONNE GAUCHE : FORMULAIRE ── */}
+        {/* ── LEFT COLUMN: FORM ── */}
         <div className="booking-form">
 
           <button className="booking-back" onClick={() => navigate('/tickets')}>
             ← Retour
           </button>
 
-          {/* 1. PASSAGERS */}
+          {/* 1. PASSENGERS */}
           <div className="booking-section">
             <div className="booking-section-header">
               <div className="booking-step-num">1</div>
@@ -233,35 +254,60 @@ export default function Booking() {
             </div>
           </div>
 
-          {/* 2. RÉSERVATION DE SIÈGE */}
+          {/* 2. SEAT RESERVATION */}
           <div className="booking-section">
             <div className="booking-section-header">
               <div className="booking-step-num">2</div>
               <h2>Réservation de siège</h2>
             </div>
 
-            <div className="booking-seat-options">
-              {[
-                { id: 'none',   label: 'Sans préférence', desc: 'Siège attribué automatiquement', price: 0 },
-                { id: 'window', label: 'Côté fenêtre',    desc: 'Vue sur le paysage',             price: 5 },
-                { id: 'aisle',  label: 'Côté couloir',    desc: 'Accès facile',                   price: 3 },
-                { id: 'quiet',  label: 'Espace silencieux', desc: 'Wagon calme garanti',          price: 8 },
-              ].map(opt => (
-                <div
-                  key={opt.id}
-                  className={`booking-seat-card${seat === opt.id ? ' selected' : ''}`}
-                  onClick={() => setSeat(opt.id as SeatOption)}
-                >
-                  <div className="booking-seat-info">
-                    <div className="booking-seat-label">{opt.label}</div>
-                    <div className="booking-seat-desc">{opt.desc}</div>
-                  </div>
-                  <div className="booking-seat-price">
-                    {opt.price === 0 ? 'Inclus' : `+ ${opt.price}€`}
+            <div className="booking-seat-mode-container" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '20px' }}>
+              {/* Random Seat Option */}
+              <div
+                className={`booking-seat-card ${seatMode === 'random' ? 'selected' : ''}`}
+                onClick={() => { 
+                  setSeatMode('random'); 
+                  setSpecificSeats([]); 
+                }}
+                style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '24px', textAlign: 'center', height: '100%', cursor: 'pointer' }}
+              >
+                <div className="booking-seat-label">Place aléatoire</div>
+                <div className="booking-seat-desc" style={{ marginBottom: '12px' }}>Attribution automatique</div>
+                <div className="booking-seat-price">Inclus</div>
+              </div>
+
+              {/* Specific Seat Option */}
+              <div
+                className={`booking-seat-card ${seatMode === 'specific' ? 'selected' : ''}`}
+                onClick={() => { 
+                  setSeatMode('specific'); 
+                  setIsSeatMapOpen(true); 
+                }}
+                style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '24px', textAlign: 'center', height: '100%', cursor: 'pointer' }}
+              >
+                <div className="booking-seat-label">Choisir sa place</div>
+                <div className="booking-seat-desc" style={{ marginBottom: '12px' }}>Sur le plan interactif</div>
+                <div className="booking-seat-price">+ 5€</div>
+              </div>
+            </div>
+
+            {/* If the user has selected specific seats on the map */}
+            {seatMode === 'specific' && specificSeats.length > 0 && (
+              <div style={{ padding: '16px', border: '2px solid var(--navy)', backgroundColor: 'var(--light)', borderRadius: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div>
+                  <div style={{ fontWeight: 'bold', color: 'var(--navy)', marginBottom: '4px' }}>Siège(s) sélectionné(s) sur le plan :</div>
+                  <div style={{ fontSize: '0.9rem', color: 'var(--gray)' }}>
+                    {specificSeats.map(s => `Voiture ${s.wagon}, Place ${s.number}`).join(' | ')}
                   </div>
                 </div>
-              ))}
-            </div>
+                <button
+                  onClick={() => setIsSeatMapOpen(true)}
+                  style={{ background: 'var(--gold)', color: 'var(--navy)', padding: '8px 16px', borderRadius: '8px', border: 'none', fontWeight: 'bold', cursor: 'pointer' }}
+                >
+                  Modifier
+                </button>
+              </div>
+            )}
           </div>
 
           {/* 3. OPTIONS */}
@@ -345,7 +391,7 @@ export default function Booking() {
             </div>
           </div>
 
-          {/* 5. PAIEMENT */}
+          {/* 5. PAYMENT */}
           <div className="booking-section">
             <div className="booking-section-header">
               <div className="booking-step-num">5</div>
@@ -363,6 +409,7 @@ export default function Booking() {
                 </label>
             </div>
 
+            {/* Form for entering card details */}
             <div className="booking-card-form" style={{ marginTop: '20px', padding: '24px', border: '1px solid #ede8df', borderRadius: '12px', background: 'var(--light)' }}>
               <div className="booking-form-row">
                 <div className="booking-form-group">
@@ -424,7 +471,7 @@ export default function Booking() {
 
         </div>
 
-        {/* ── COLONNE DROITE : RÉSUMÉ ── */}
+        {/* ── RIGHT COLUMN: SUMMARY ── */}
         <aside className="booking-summary">
           <div className="booking-summary-title">Votre commande</div>
 
@@ -451,10 +498,10 @@ export default function Booking() {
               <span>Billet</span>
               <span>{basePrice}€</span>
             </div>
-            {seatPrice[seat] > 0 && (
+            {currentSeatPrice > 0 && (
               <div className="booking-total-row">
-                <span>Siège</span>
-                <span>+{seatPrice[seat]}€</span>
+                <span>Choix de la place</span>
+                <span>+{currentSeatPrice}€</span>
               </div>
             )}
             {baggagePrice > 0 && (
@@ -479,6 +526,18 @@ export default function Booking() {
         </aside>
 
       </div>
-    </div>
+      {/* MODAL AT THE END */}
+      <SeatMapModal 
+        isOpen={isSeatMapOpen} 
+        maxSeats={1}
+        currentSelection={specificSeats}
+        onClose={() => setIsSeatMapOpen(false)} 
+        onConfirm={(seats) => {
+          setSpecificSeats(seats);
+          setIsSeatMapOpen(false);
+          if (seats.length === 0) setSeatMode('random'); 
+        }}
+      />
+    </div> 
   );
 }
