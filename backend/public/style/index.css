@@ -287,6 +287,12 @@
     transition: transform 0.4s;
   }
 
+  .route-img-bg img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
   .route-card:hover .route-img-bg { transform: scale(1.05); }
 
   .route-img-overlay {
