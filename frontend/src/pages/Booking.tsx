@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import type { PassengerForm } from "../PassengerForm";
 import type { ContactForm } from "../ContactForm";
@@ -57,6 +57,40 @@ export default function Booking() {
   const [payment] = useState<PaymentMethod>('card');
   const [message, setMessage] = useState<{ text: string; type: 'error' | 'success' | '' }>({ text: '', type: '' });
   const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    const autofillUserData = async () => {
+      try {
+        const response = await fetch('http://localhost:8000/api_user.php', {
+          method: 'GET',
+          credentials: 'include'
+        });
+        const data = await response.json();
+
+        if (data.status === 'success') {
+          // Заповнюємо пасажира
+          setPassenger(prev => ({
+            ...prev,
+            civilite: data.user.civilite || 'M',
+            prenom: data.user.prenom || '',
+            nom: data.user.nom || '',
+            dob: data.user.dob || ''
+          }));
+          
+          // Заповнюємо контакти
+          setContact(prev => ({
+            ...prev,
+            email: data.user.mail || '',
+            telephone: data.user.telephone || ''
+          }));
+        }
+      } catch (error) {
+        console.log("Utilisateur non connecté ou erreur serveur");
+      }
+    };
+
+    autofillUserData();
+  }, []);
 
   // ── Timer ──
   const [timerSec] = useState(900);

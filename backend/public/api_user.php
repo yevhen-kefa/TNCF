@@ -30,7 +30,10 @@ if(isset($_SESSION['user_id'])){
             "id" => $_SESSION['user_id'],
             "nom" => $_SESSION['nom'],
             "prenom" => $_SESSION['prenom'],
-            "mail" => $_SESSION['mail']
+            "mail" => $_SESSION['mail'],
+            "telephone" => $_SESSION['telephone'] ?? '', 
+            "dob" => $_SESSION['dob'] ?? '',
+            "civilite" => $_SESSION['civilite'] ?? 'M'
         ]
     ]);
 }else{

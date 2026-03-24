@@ -1,4 +1,10 @@
 <?php
+// Clear output buffer to prevent "headers already sent" errors
+ob_start();
+ob_clean();
+error_reporting(0);
+ini_set('display_errors', 0);
+
 // Settings for CORS
 $allowed_origin = "http://localhost:3000"; 
 if (isset($_SERVER['HTTP_ORIGIN']) && $_SERVER['HTTP_ORIGIN'] === $allowed_origin) {
@@ -15,50 +21,96 @@ header("Access-Control-Allow-Headers: Content-Type, Authorization");
 // PREFLIGHT (OPTIONS)
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
+    ob_end_flush();
     exit();
 }
 
-// Read data from REACT
-$raw  = file_get_contents('php://input');
-$data = json_decode($raw, true);
+try {
+    // Start session to get user ID if logged in
+    session_start();
 
-if (!$data) {
-    http_response_code(400);
-    echo json_encode(['status' => 'error', 'message' => 'Invalid data']);
-    exit();
-}
+    // Include Database class
+    require_once __DIR__ . '/../src/Config/Database.php';
 
-// Getting seat 
-$cls = $data['train']['cls'] ?? '2';
-$seatMode = $data['seatMode'] ?? 'random';
-$specificSeats = $data['specificSeats'] ?? [];
+    // Read data from REACT
+    $raw  = file_get_contents('php://input');
+    $data = json_decode($raw, true);
 
-if ($seatMode === 'specific' && !empty($specificSeats)) {
-    // If user chosed, we use it
-    $assignedSeat = $specificSeats[0];
-} else {
-    // if not, we search in random
-    $wagon = ($cls === '1') ? rand(1, 2) : rand(3, 7);
-    $row = rand(1, 14);
-    $letters = ($cls === '1') ? ['A', 'C', 'D'] : ['A', 'B', 'C', 'D'];
-    $letter = $letters[array_rand($letters)];
-    
-    $assignedSeat = [
-        'wagon' => $wagon,
-        'number' => $row . $letter,
-        'type' => (rand(0, 1) ? 'standard' : 'table')
+    if (!$data) {
+        ob_clean();
+        http_response_code(400);
+        echo json_encode(['status' => 'error', 'message' => 'Invalid data']);
+        exit();
+    }
+
+    // Getting seat 
+    $cls = $data['train']['cls'] ?? '2';
+    $seatMode = $data['seatMode'] ?? 'random';
+    $specificSeats = $data['specificSeats'] ?? [];
+
+    if ($seatMode === 'specific' && !empty($specificSeats)) {
+        // If user chose, we use it
+        $assignedSeat = $specificSeats[0];
+    } else {
+        // If not, we search in random
+        $wagon = ($cls === '1') ? rand(1, 2) : rand(3, 7);
+        $row = rand(1, 14);
+        $letters = ($cls === '1') ? ['A', 'C', 'D'] : ['A', 'B', 'C', 'D'];
+        $letter = $letters[array_rand($letters)];
+        
+        $assignedSeat = [
+            'wagon' => $wagon,
+            'number' => $row . $letter,
+            'type' => (rand(0, 1) ? 'standard' : 'table')
+        ];
+    }
+
+    // Generation number of order
+    $orderNumber = 'TNCF-' . strtoupper(substr(md5(uniqid()), 0, 6));
+
+    // Connect to Database
+    $db = new \Config\Database();
+    $manager = $db->getManager();
+
+    // Prepare data for DB
+    $id_uti = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : null;
+    $id_voyage = $data['train']['_id'] ?? null;
+
+    $newTicket = [
+        'id_voyage' => $id_voyage,
+        'id_uti' => $id_uti,
+        'option' => $seatMode === 'specific' ? 'choisie' : 'aleatoire',
+        'wagon' => (string) $assignedSeat['wagon'],
+        'place' => (string) $assignedSeat['number'],
+        'orderNumber' => $orderNumber, 
+        'prix_paye' => $data['total'] ?? 0,
+        'date_achat' => new \MongoDB\BSON\UTCDateTime()
     ];
+
+    // Insert into DB using BulkWrite
+    $bulk = new \MongoDB\Driver\BulkWrite;
+    $bulk->insert($newTicket);
+    
+    $manager->executeBulkWrite($db->getDbName() . '.billet', $bulk);
+
+    // Sent good request
+    ob_clean();
+    http_response_code(200);
+    echo json_encode([
+        'status' => 'success',
+        'message' => 'Booking successful',
+        'orderNumber' => $orderNumber,
+        'assignedSeat' => $assignedSeat 
+    ]);
+    exit();
+
+} catch (\Throwable $e) {
+    ob_clean();
+    // Return 200 to prevent CORS issues on fatal errors, but send error status in JSON
+    http_response_code(200);
+    echo json_encode([
+        'status' => 'error',
+        'message' => 'Fatal Error: ' . $e->getMessage()
+    ]);
+    exit();
 }
-
-// Generation number of order
-$orderNumber = 'TNCF-' . strtoupper(substr(md5(uniqid()), 0, 6));
-
-// Sent good request
-http_response_code(200);
-echo json_encode([
-    'status' => 'success',
-    'message' => 'Réservation réussie',
-    'orderNumber' => $orderNumber,
-    'assignedSeat' => $assignedSeat 
-]);
-exit();

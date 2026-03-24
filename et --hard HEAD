@@ -1,0 +1,22 @@
+[33mbc95ab8[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m add pdf for ticekt
+[33m72691d6[m add pdf ticket
+[33ma5a303d[m add page 'booking'
+[33m611c68c[m add page 'booking'
+[33m79222bc[m feat: implement session management, sync pricing, and fix navigation UI
+[33mb8de858[m feat: Navitia API integration, ticket refactoring and interactive calendar
+[33m4ebe76b[m add tickets
+[33m01fcce5[m add images for cities
+[33m51995a1[m add  Signup and Login
+[33m4c9d2da[m Merge branch 'main' of github.com:yevhen-kefa/TNCF
+[33m30cb374[m change gitignore
+[33m012cbf0[m fixed bdd entry
+[33mc4d4bc8[m Merge branch 'main' of github.com:yevhen-kefa/TNCF
+[33m745aba6[m change singup.php and login.php into Singup.tsx and Login.tsx
+[33mde83805[m Added city images (to be implemented in index.php)
+[33ma722456[m add db
+[33mcae79bb[m add db
+[33mdeea72f[m compte
+[33m8a6ae9a[m modif ticket.php
+[33me239924[m changing design for inde.php, login.php, singup.php
+[33m6a28031[m Create page home, login, insc, tickets
+[33m83a6810[m Initial commit
