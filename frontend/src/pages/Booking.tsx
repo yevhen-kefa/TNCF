@@ -131,6 +131,20 @@ export default function Booking() {
       const data = await response.json();
 
       if (data.status === 'success') {
+        let arrTime = '--:--';
+        if (train?.dep) {
+          const [h, m] = train.dep.split(':').map(Number);
+          let durH = 1, durM = 55; 
+          const anyTrain = train as any;
+          if (anyTrain?.temps_arriver) {
+             const match = anyTrain.temps_arriver.match(/(\d+)h\s*(\d+)/);
+             if (match) { durH = parseInt(match[1]); durM = parseInt(match[2]); }
+          }
+          const totalM = h * 60 + m + durH * 60 + durM;
+          arrTime = `${Math.floor(totalM / 60) % 24}`.padStart(2, '0') + ':' + `${totalM % 60}`.padStart(2, '0');
+        }
+
+
         navigate('/confirmation', {
           state: {
             booking: {
@@ -138,8 +152,9 @@ export default function Booking() {
               passenger:   passenger,
               contact:     contact,
               total:       total,
-              orderNumber: data.orderNumber
-                ?? 'TNCF-' + Math.random().toString(36).slice(2, 8).toUpperCase(),
+              orderNumber: data.orderNumber,
+              assignedSeat: data.assignedSeat, 
+              arrivalTime: arrTime
             }
           }
         });

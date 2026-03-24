@@ -28,6 +28,28 @@ if (!$data) {
     exit();
 }
 
+// Getting seat 
+$cls = $data['train']['cls'] ?? '2';
+$seatMode = $data['seatMode'] ?? 'random';
+$specificSeats = $data['specificSeats'] ?? [];
+
+if ($seatMode === 'specific' && !empty($specificSeats)) {
+    // If user chosed, we use it
+    $assignedSeat = $specificSeats[0];
+} else {
+    // if not, we search in random
+    $wagon = ($cls === '1') ? rand(1, 2) : rand(3, 7);
+    $row = rand(1, 14);
+    $letters = ($cls === '1') ? ['A', 'C', 'D'] : ['A', 'B', 'C', 'D'];
+    $letter = $letters[array_rand($letters)];
+    
+    $assignedSeat = [
+        'wagon' => $wagon,
+        'number' => $row . $letter,
+        'type' => (rand(0, 1) ? 'standard' : 'table')
+    ];
+}
+
 // Generation number of order
 $orderNumber = 'TNCF-' . strtoupper(substr(md5(uniqid()), 0, 6));
 
@@ -36,6 +58,7 @@ http_response_code(200);
 echo json_encode([
     'status' => 'success',
     'message' => 'Réservation réussie',
-    'orderNumber' => $orderNumber
+    'orderNumber' => $orderNumber,
+    'assignedSeat' => $assignedSeat 
 ]);
 exit();

@@ -15,6 +15,8 @@ interface BookingState {
   contact: ContactForm;
   orderNumber: string;
   total: number;
+  assignedSeat: { wagon: number; number: string; type: string };
+  arrivalTime: string;
 }
 
 export default function Confirmation() {
@@ -32,6 +34,8 @@ export default function Confirmation() {
   const train       = booking?.train;
   const passenger   = booking?.passenger;
   const total       = booking?.total ?? 0;
+  const assignedSeat = booking?.assignedSeat ?? { wagon: 2, number: '12A', type: 'standard' };
+  const arrivalTime  = booking?.arrivalTime ?? '10:00';
 
   // ── Téléchargement PDF ──────────────────────────────
   const handleDownloadPdf = async () => {
@@ -48,6 +52,8 @@ export default function Confirmation() {
           contact:   booking?.contact,
           train:     booking?.train,
           total:     booking?.total,
+          assignedSeat, 
+          arrivalTime
         }),
       });
 
@@ -74,14 +80,7 @@ export default function Confirmation() {
       URL.revokeObjectURL(url);
 
     } catch (error) {
-      if (error instanceof TypeError) {
-        // Erreur réseau (pas de connexion, CORS, etc.)
-        setDownloadError('Impossible de contacter le serveur. Vérifiez votre connexion.');
-      } else if (error instanceof Error) {
-        setDownloadError(error.message);
-      } else {
-        setDownloadError('Une erreur inattendue est survenue.');
-      }
+      setDownloadError(error instanceof Error ? error.message : 'Erreur inattendue.');
     } finally {
       setIsDownloading(false);
     }
@@ -89,33 +88,18 @@ export default function Confirmation() {
 
   return (
     <div className="confirmation-page">
-
-      {/* ── TOPBAR ── */}
       <div className="topbar">
         <a href="/" className="brand">
-          <div className="brand-logo">
-            <img src={logoSvg} alt="TNCF" />
-          </div>
+          <div className="brand-logo"><img src={logoSvg} alt="TNCF" /></div>
         </a>
         <div className="topbar-actions">
-          <a href="#" className="cart-btn">
-            <img src={boxSvg} alt="" />
-            Panier
-            <span className="cart-count">0</span>
-          </a>
-          <a href="/login" className="cart-btn">
-            <img src={persoWhiteSvg} alt="" />
-            Connexion
-          </a>
+          <a href="#" className="cart-btn"><img src={boxSvg} alt="" />Panier<span className="cart-count">0</span></a>
+          <a href="/login" className="cart-btn"><img src={persoWhiteSvg} alt="" />Connexion</a>
         </div>
       </div>
 
-      {/* ── CONTENU PRINCIPAL ── */}
       <div className="confirmation-body">
-
-        {/* Icône succès */}
         <div className="confirmation-success-icon">✓</div>
-
         <div className="confirmation-eyebrow">Réservation confirmée</div>
         <h1 className="confirmation-title">Merci pour votre achat !</h1>
         <p className="confirmation-subtitle">
@@ -125,61 +109,50 @@ export default function Confirmation() {
           )}
         </p>
 
-        {/* ── CARTE DU BILLET ── */}
         <div className="confirmation-card">
-
-          {/* En-tête sombre */}
           <div className="confirmation-card-header">
             <div>
               <div className="confirmation-order-label">Numéro de commande</div>
               <div className="confirmation-order-num">{orderNumber}</div>
             </div>
-            <div className="confirmation-badge">✓ Confirmé</div>
+            <div className="confirmation-badge">Confirmé</div>
           </div>
 
-          {/* Visuel du trajet */}
           <div className="confirmation-ticket">
-
             <div className="confirmation-station">
               <div className="confirmation-time">{train?.dep ?? '08:01'}</div>
               <div className="confirmation-city">{train?.from ?? 'Paris'}</div>
-              <div className="confirmation-station-label">Gare de Lyon</div>
+              <div className="confirmation-station-label">Gare de départ</div>
             </div>
 
             <div className="confirmation-line">
-              <div className="confirmation-train-num">
-                {train?.num ?? 'TGV INOUI 6603'}
-              </div>
+              <div className="confirmation-train-num">{train?.num ?? 'TGV INOUI 6603'}</div>
               <div className="confirmation-track">
                 <div className="confirmation-dot"></div>
                 <div className="confirmation-rail"></div>
                 <div className="confirmation-dot"></div>
               </div>
-              <div className="confirmation-direct">✓ Direct</div>
+              <div className="confirmation-direct">Direct</div>
             </div>
 
             <div className="confirmation-station confirmation-station-right">
-              <div className="confirmation-time">Arrivée</div>
+              <div className="confirmation-time">{arrivalTime}</div>
               <div className="confirmation-city">{train?.to ?? 'Lyon'}</div>
-              <div className="confirmation-station-label">Part-Dieu</div>
+              <div className="confirmation-station-label">Gare d'arrivée</div>
             </div>
-
           </div>
 
-          {/* Détails passager / classe / prix */}
           <div className="confirmation-details">
             <div className="confirmation-detail-item">
               <div className="confirmation-detail-label">Passager</div>
               <div className="confirmation-detail-value">
-                {passenger
-                  ? `${passenger.civilite}. ${passenger.prenom} ${passenger.nom}`
-                  : '—'}
+                {passenger ? `${passenger.civilite}. ${passenger.prenom} ${passenger.nom}` : '—'}
               </div>
             </div>
             <div className="confirmation-detail-item">
-              <div className="confirmation-detail-label">Classe</div>
+              <div className="confirmation-detail-label">Classe & Place</div>
               <div className="confirmation-detail-value">
-                {train?.cls === '1' ? '1ère classe' : '2ème classe'}
+                {train?.cls === '1' ? '1ère' : '2ème'} cl. · <span style={{color:'var(--gold)'}}>Voiture {assignedSeat.wagon}, Place {assignedSeat.number}</span>
               </div>
             </div>
             <div className="confirmation-detail-item">
@@ -189,43 +162,16 @@ export default function Confirmation() {
               </div>
             </div>
           </div>
-
         </div>
 
-        {/* ── ACTIONS ── */}
         <div className="confirmation-actions">
-
-          <button
-            className="confirmation-btn-pdf"
-            onClick={handleDownloadPdf}
-            disabled={isDownloading}
-          >
-            {isDownloading ? (
-              '⏳ Génération en cours...'
-            ) : (
-              <>
-                <span className="confirmation-btn-icon">⬇</span>
-                Télécharger le billet (PDF)
-              </>
-            )}
+          <button className="confirmation-btn-pdf" onClick={handleDownloadPdf} disabled={isDownloading}>
+            {isDownloading ? '⏳ Génération en cours...' : <><span className="confirmation-btn-icon">⬇</span>Télécharger le billet (PDF)</>}
           </button>
-
-          <button
-            className="confirmation-btn-secondary"
-            onClick={() => navigate('/tickets')}
-          >
-            Réserver un autre billet
-          </button>
-
+          <button className="confirmation-btn-secondary" onClick={() => navigate('/tickets')}>Réserver un autre billet</button>
         </div>
 
-        {/* Erreur téléchargement */}
-        {downloadError && (
-          <div className="confirmation-error">
-            ⚠ {downloadError}
-          </div>
-        )}
-
+        {downloadError && <div className="confirmation-error">⚠ {downloadError}</div>}
       </div>
     </div>
   );
