@@ -112,7 +112,7 @@
   <div class="routes-grid">
     <a href="tickets.html" class="route-card">
       <div class="route-img">
-        <div class="route-img-bg bg-paris"></div>
+        <div class="route-img-bg bg-paris"><img src="img/cities/paris.jpg" alt="Paris"></div>
         <div class="route-img-overlay"></div>   
       </div>
       <div class="route-body">
@@ -124,7 +124,7 @@
 
     <a href="tickets.html" class="route-card">
       <div class="route-img">
-        <div class="route-img-bg bg-marseille"></div>
+        <div class="route-img-bg bg-marseille"><img src="img/cities/marseille.jpg" alt="Marseille"></div>
         <div class="route-img-overlay"></div>
       </div>
       <div class="route-body">
@@ -136,7 +136,7 @@
 
     <a href="tickets.html" class="route-card">
       <div class="route-img">
-        <div class="route-img-bg bg-bordeaux"></div>
+        <div class="route-img-bg bg-bordeaux"><img src="img/cities/bordeaux.jpg" alt="Bordeaux"></div>
         <div class="route-img-overlay"></div>
       </div>
       <div class="route-body">
@@ -148,7 +148,7 @@
 
     <a href="tickets.html" class="route-card">
       <div class="route-img">
-        <div class="route-img-bg bg-nice"></div>
+        <div class="route-img-bg bg-nice"><img src="img/cities/nice.jpg" alt="Nice"></div>
         <div class="route-img-overlay"></div>
       </div>
       <div class="route-body">
@@ -160,7 +160,7 @@
 
     <a href="tickets.html" class="route-card">
       <div class="route-img">
-        <div class="route-img-bg bg-lille"></div>
+        <div class="route-img-bg bg-lille"><img src="img/cities/lille.jpg" alt="Lille"></div>
         <div class="route-img-overlay"></div>
       </div>
       <div class="route-body">
@@ -172,7 +172,7 @@
 
     <a href="tickets.html" class="route-card">
       <div class="route-img">
-        <div class="route-img-bg bg-lyon"></div>
+        <div class="route-img-bg bg-lyon"><img src="img/cities/lyon.jpg" alt="Lyon"></div>
         <div class="route-img-overlay"></div>
       </div>
       <div class="route-body">
@@ -184,7 +184,7 @@
     
     <a href="tickets.html" class="route-card">
       <div class="route-img">
-        <div class="route-img-bg bg-lyon"></div>
+        <div class="route-img-bg bg-lyon"><img src="img/cities/rennes.jpg" alt="Rennes"></div>
         <div class="route-img-overlay"></div>
       </div>
       <div class="route-body">
@@ -196,7 +196,7 @@
 
     <a href="tickets.html" class="route-card">
       <div class="route-img">
-        <div class="route-img-bg bg-lyon"></div>
+        <div class="route-img-bg bg-lyon"><img src="img/cities/caen.jpg" alt="Caen"></div>
         <div class="route-img-overlay"></div>
       </div>
       <div class="route-body">
@@ -208,7 +208,7 @@
 
     <a href="tickets.html" class="route-card">
       <div class="route-img">
-        <div class="route-img-bg bg-lyon"></div>
+        <div class="route-img-bg bg-lyon"><img src="img/cities/strasbourg.jpg" alt="Strasbourg"></div>
         <div class="route-img-overlay"></div>
       </div>
       <div class="route-body">
