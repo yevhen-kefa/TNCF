@@ -43,64 +43,72 @@ try {
         exit();
     }
 
-    // Getting seat 
-    $cls = $data['train']['cls'] ?? '2';
-    $seatMode = $data['seatMode'] ?? 'random';
-    $specificSeats = $data['specificSeats'] ?? [];
-
-    if ($seatMode === 'specific' && !empty($specificSeats)) {
-        // If user chose, we use it
-        $assignedSeat = $specificSeats[0];
-    } else {
-        // If not, we search in random
-        $wagon = ($cls === '1') ? rand(1, 2) : rand(3, 7);
-        $row = rand(1, 14);
-        $letters = ($cls === '1') ? ['A', 'C', 'D'] : ['A', 'B', 'C', 'D'];
-        $letter = $letters[array_rand($letters)];
-        
-        $assignedSeat = [
-            'wagon' => $wagon,
-            'number' => $row . $letter,
-            'type' => (rand(0, 1) ? 'standard' : 'table')
-        ];
+    $cartItems = $data['cartItems'] ?? [];
+    if (empty($cartItems)) {
+        ob_clean();
+        http_response_code(400);
+        echo json_encode(['status' => 'error', 'message' => 'Cart is empty']);
+        exit();
     }
 
-    // Generation number of order
     $orderNumber = 'TNCF-' . strtoupper(substr(md5(uniqid()), 0, 6));
-
+    
     // Connect to Database
     $db = new \Config\Database();
     $manager = $db->getManager();
-
-    // Prepare data for DB
     $id_uti = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : null;
-    $id_voyage = $data['train']['_id'] ?? null;
-
-    $newTicket = [
-        'id_voyage' => $id_voyage,
-        'id_uti' => $id_uti,
-        'option' => $seatMode === 'specific' ? 'choisie' : 'aleatoire',
-        'wagon' => (string) $assignedSeat['wagon'],
-        'place' => (string) $assignedSeat['number'],
-        'orderNumber' => $orderNumber, 
-        'prix_paye' => $data['total'] ?? 0,
-        'date_achat' => new \MongoDB\BSON\UTCDateTime()
-    ];
-
-    // Insert into DB using BulkWrite
-    $bulk = new \MongoDB\Driver\BulkWrite;
-    $bulk->insert($newTicket);
     
+    $bulk = new \MongoDB\Driver\BulkWrite;
+    $assignedSeats = [];
+
+    foreach ($cartItems as $item) {
+        $train = $item['train'] ?? [];
+        $cls = $train['cls'] ?? '2';
+        $seatMode = $item['seatMode'] ?? 'random';
+        $specificSeats = $item['specificSeats'] ?? [];
+
+        if ($seatMode === 'specific' && !empty($specificSeats)) {
+            $assignedSeat = $specificSeats[0];
+        } else {
+            $wagon = ($cls === '1') ? rand(1, 2) : rand(3, 7);
+            $row = rand(1, 14);
+            $letters = ($cls === '1') ? ['A', 'C', 'D'] : ['A', 'B', 'C', 'D'];
+            $letter = $letters[array_rand($letters)];
+            
+            $assignedSeat = [
+                'wagon' => $wagon,
+                'number' => $row . $letter,
+                'type' => (rand(0, 1) ? 'standard' : 'table')
+            ];
+        }
+
+        $assignedSeats[] = $assignedSeat;
+
+        $newTicket = [
+            'id_voyage' => $train['trainId'] ?? null,
+            'id_uti' => $id_uti,
+            'option' => $seatMode === 'specific' ? 'choisie' : 'aleatoire',
+            'wagon' => (string) $assignedSeat['wagon'],
+            'place' => (string) $assignedSeat['number'],
+            'orderNumber' => $orderNumber, 
+            'prix_paye' => $item['total'] ?? 0,
+            'date_achat' => new \MongoDB\BSON\UTCDateTime()
+        ];
+
+        $bulk->insert($newTicket);
+    }
+
+    // Connect to Database
     $manager->executeBulkWrite($db->getDbName() . '.billet', $bulk);
 
-    // Sent good request
+    // Send good request
     ob_clean();
     http_response_code(200);
     echo json_encode([
         'status' => 'success',
         'message' => 'Booking successful',
         'orderNumber' => $orderNumber,
-        'assignedSeat' => $assignedSeat 
+        'assignedSeats' => $assignedSeats 
     ]);
     exit();
 

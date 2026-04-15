@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import '../assets/style/count.css';
 import '../assets/img/images';
-import { alertSvg, arriveSvg, arrowLeftSvg, arrowRightSvg, boxGoldSvg, cartSvg, departSvg, layerSvg, logoSvg, mailSvg, passSvg, persoWhiteSvg, shielSvg, tickeSvg } from '../assets/img/images';
+import { alertSvg, arriveSvg, arrowLeftSvg, arrowRightSvg, boxGoldSvg, cartSvg, departSvg, layerSvg, logoSvg, mailSvg, passSvg, persoWhiteSvg, shielSvg, tickeSvg, boxSvg } from '../assets/img/images';
+import { useCart } from '../context/CartContext';
 
 
 export default function Account() {
@@ -41,6 +42,7 @@ export default function Account() {
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const [atStart, setAtStart] = useState(true);
+  const { cartItems } = useCart();
   const [atEnd, setAtEnd] = useState(false);
 
   const [isDragging, setIsDragging] = useState(false);
@@ -119,7 +121,11 @@ export default function Account() {
           <li><a href="/tickets">Billets</a></li>
           <li><a href="/account" className="active">Compte</a></li>
         </ul>
-        <div className="nav-actions">
+        <div className="nav-actions" style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
+          <a href="/cart" className="cart-btn" style={{ background: 'none', border: 'none', display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--navy)', textDecoration: 'none', fontWeight: 600 }}>
+            <img src={boxSvg} alt="" style={{ width: '20px' }} />
+            Panier <span className="cart-count" style={{ background: 'var(--gold)', padding: '2px 6px', borderRadius: '12px', fontSize: '0.75rem', color: 'var(--navy)' }}>{cartItems.length}</span>
+          </a>
           <a href="/tickets" className="btn-nav-outline">+ Réserver</a>
         </div>
       </nav>

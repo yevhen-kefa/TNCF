@@ -6,12 +6,12 @@ import type { ContactForm } from "../ContactForm";
 import type { SelectedTrain } from "../SelectedTrain";
 import type { Seat } from '../components/SeatModal'; 
 import SeatMapModal from "../components/SeatModal";
+import { useCart } from '../context/CartContext';
 
 import '../assets/style/booking.css';
 import '../assets/img/images';
 import { boxSvg, clockSvg, logoSvg, persoWhiteSvg } from "../assets/img/images";
 
-type PaymentMethod = 'card';
 type SeatMode = 'random' | 'specific'; // New type for seat selection mode
 
 interface BaggageOptions {
@@ -42,19 +42,13 @@ export default function Booking() {
     telephone: '',
   });
 
-  const [cardDetails, setCardDetails] = useState({
-    name: '',
-    number: '',
-    expiry: '',
-    cvv: ''
-  });
+  const { addToCart } = useCart();
 
   const [seatMode, setSeatMode] = useState<SeatMode>('random');
   const [isSeatMapOpen, setIsSeatMapOpen] = useState(false);
   const [specificSeats, setSpecificSeats] = useState<Seat[]>([]);
   
   const [baggage, setBaggage] = useState<BaggageOptions>({ extra: 0, special: 0 });
-  const [payment] = useState<PaymentMethod>('card');
   const [message, setMessage] = useState<{ text: string; type: 'error' | 'success' | '' }>({ text: '', type: '' });
   const [isLoading, setIsLoading] = useState(false);
 
@@ -113,11 +107,6 @@ export default function Booking() {
     setContact(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleCardChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setCardDetails(prev => ({ ...prev, [name]: value }));
-  };
-
   const handleSubmit = async () => {
     // Validation
     if (!passenger.prenom || !passenger.nom) {
@@ -128,80 +117,27 @@ export default function Booking() {
       setMessage({ text: 'Veuillez entrer votre adresse e-mail.', type: 'error' });
       return;
     }
-    if (!cardDetails.name || !cardDetails.number || !cardDetails.expiry || !cardDetails.cvv) {
-      setMessage({ text: 'Veuillez remplir tous les champs de la carte bancaire.', type: 'error' });
-      return;
-    }
     if (seatMode === 'specific' && specificSeats.length === 0) {
       setMessage({ text: 'Veuillez sélectionner votre place sur le plan interactif.', type: 'error' });
       return;
     }
+    if(!train) {
+      setMessage({ text: 'Train est invalide.', type: 'error' });
+      return;
+    }
 
-    setIsLoading(true);
-
-    // Payload to send to PHP API
-    const payload = {
+    addToCart({
+      id: Date.now().toString(),
+      train,
       passenger,
       contact,
       seatMode,
       specificSeats,
       baggage,
-      payment,
-      cardDetails: {
-          name: cardDetails.name,
-          number: cardDetails.number.replace(/\s/g, ''),
-          expiry: cardDetails.expiry
-      },
-      train,
-      total,
-    };
+      total
+    });
 
-    try {
-      const response = await fetch('http://localhost:8000/api_booking.php', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-      const data = await response.json();
-
-      if (data.status === 'success') {
-        let arrTime = '--:--';
-        if (train?.dep) {
-          const [h, m] = train.dep.split(':').map(Number);
-          let durH = 1, durM = 55; 
-          const anyTrain = train as any;
-          if (anyTrain?.temps_arriver) {
-             const match = anyTrain.temps_arriver.match(/(\d+)h\s*(\d+)/);
-             if (match) { durH = parseInt(match[1]); durM = parseInt(match[2]); }
-          }
-          const totalM = h * 60 + m + durH * 60 + durM;
-          arrTime = `${Math.floor(totalM / 60) % 24}`.padStart(2, '0') + ':' + `${totalM % 60}`.padStart(2, '0');
-        }
-
-
-        navigate('/confirmation', {
-          state: {
-            booking: {
-              train:       train,
-              passenger:   passenger,
-              contact:     contact,
-              total:       total,
-              orderNumber: data.orderNumber,
-              assignedSeat: data.assignedSeat, 
-              arrivalTime: arrTime
-            }
-          }
-        });
-        return; 
-      }else {
-        setMessage({ text: data.message || 'Une erreur est survenue.', type: 'error' });
-        setIsLoading(false);
-      }
-    } catch {
-      // API not ready yet — simulating success
-      setMessage({ text: 'Réservation confirmée ! (mode démo)', type: 'success' });
-      setIsLoading(false);
-    }
+    navigate('/cart');
   };
 
   return (
@@ -440,76 +376,7 @@ export default function Booking() {
             </div>
           </div>
 
-          {/* 5. PAYMENT */}
-          <div className="booking-section">
-            <div className="booking-section-header">
-              <div className="booking-step-num">5</div>
-              <h2>Paiement</h2>
-            </div>
-            <p className="booking-section-sub">Saisissez les informations de votre carte bancaire</p>
-
-            <div className="booking-payment-options">
-                <label className="booking-payment-card selected">
-                  <div className="booking-payment-radio">
-                    <div className="booking-payment-dot active"></div>
-                  </div>
-                  <span className="booking-payment-icon">💳</span>
-                  <span className="booking-payment-label">Carte bancaire</span>
-                </label>
-            </div>
-
-            {/* Form for entering card details */}
-            <div className="booking-card-form" style={{ marginTop: '20px', padding: '24px', border: '1px solid #ede8df', borderRadius: '12px', background: 'var(--light)' }}>
-              <div className="booking-form-row">
-                <div className="booking-form-group">
-                  <label className="booking-label">Titulaire de la carte *</label>
-                  <input
-                    className="booking-input"
-                    type="text" name="name"
-                    placeholder="Jean Dupont"
-                    value={cardDetails.name}
-                    onChange={handleCardChange}
-                  />
-                </div>
-              </div>
-              
-              <div className="booking-form-row" style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
-                <div className="booking-form-group" style={{ flex: '2 1 200px' }}>
-                  <label className="booking-label">Numéro de carte *</label>
-                  <input
-                    className="booking-input"
-                    type="text" name="number"
-                    placeholder="0000 0000 0000 0000"
-                    maxLength={19}
-                    value={cardDetails.number}
-                    onChange={handleCardChange}
-                  />
-                </div>
-                <div className="booking-form-group" style={{ flex: '1 1 80px' }}>
-                  <label className="booking-label">Expiration *</label>
-                  <input
-                    className="booking-input"
-                    type="text" name="expiry"
-                    placeholder="MM/AA"
-                    maxLength={5}
-                    value={cardDetails.expiry}
-                    onChange={handleCardChange}
-                  />
-                </div>
-                <div className="booking-form-group" style={{ flex: '1 1 80px' }}>
-                  <label className="booking-label">CVC *</label>
-                  <input
-                    className="booking-input"
-                    type="text" name="cvv"
-                    placeholder="123"
-                    maxLength={4}
-                    value={cardDetails.cvv}
-                    onChange={handleCardChange}
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
+  
 
           {/* MESSAGE */}
           {message.text && (
@@ -570,7 +437,7 @@ export default function Booking() {
             onClick={handleSubmit}
             disabled={isLoading}
           >
-            {isLoading ? 'CHARGEMENT...' : 'Payer maintenant'}
+            {isLoading ? 'CHARGEMENT...' : 'Ajouter au panier'}
           </button>
         </aside>
 
