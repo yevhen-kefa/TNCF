@@ -76,17 +76,27 @@ try {
     $id_uti = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : null;
     $id_voyage = $data['train']['_id'] ?? null;
 
+    // Convert string IDs to MongoDB ObjectIds if they are valid 24-char strings
+    $user_id_obj = null;
+    if ($id_uti && strlen($id_uti) === 24) {
+        $user_id_obj = new \MongoDB\BSON\ObjectId($id_uti);
+    }
+
+    $voyage_id_obj = null;
+    if ($id_voyage && strlen($id_voyage) === 24) {
+        $voyage_id_obj = new \MongoDB\BSON\ObjectId($id_voyage);
+    }
+
     $newTicket = [
-        'id_voyage' => $id_voyage,
-        'id_uti' => $id_uti,
+        'id_voyage' => $voyage_id_obj ?? $id_voyage,
+        'id_uti' => $user_id_obj ?? $id_uti, 
         'option' => $seatMode === 'specific' ? 'choisie' : 'aleatoire',
-        'wagon' => (string) $assignedSeat['wagon'],
-        'place' => (string) $assignedSeat['number'],
+        'wagon' => (string) $assigned_seat['wagon'],
+        'place' => (string) $assigned_seat['number'],
         'orderNumber' => $orderNumber, 
         'prix_paye' => $data['total'] ?? 0,
         'date_achat' => new \MongoDB\BSON\UTCDateTime()
     ];
-
     // Insert into DB using BulkWrite
     $bulk = new \MongoDB\Driver\BulkWrite;
     $bulk->insert($newTicket);

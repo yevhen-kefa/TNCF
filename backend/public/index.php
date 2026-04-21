@@ -19,13 +19,13 @@
 
   <ul class="nav-links">
     <li><a href="index.php" class="nav-link active">Voyager</a></li>
-    <li><a href="#">Billets</a></li>
-    <li><a href="#">Offres</a></li>
-    <li><a href="count.php">Compte</a></li>
+    <li><a href="http://localhost:3000/tickets">Billets</a></li>
+    
+    <li><a href="http://localhost:3000/account">Compte</a></li>
   </ul>
 
   <div class="nav-actions">
-    <a href="login.php" class="btn-nav-outline">Se connecter</a>
+    <a href="http://localhost:3000/login" class="btn-nav-outline">Se connecter</a>
   </div>
 </nav>
 
@@ -92,7 +92,7 @@
       </div>
 
       <div>
-        <button class="btn-search" onclick="window.location.href='tickets.php'">
+        <button class="btn-search" onclick="window.location.href=''">
           <img src="img/search.svg" alt="">
           Rechercher
         </button>

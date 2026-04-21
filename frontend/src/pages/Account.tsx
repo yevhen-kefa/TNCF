@@ -1,43 +1,51 @@
 import React, { useState, useRef, useEffect } from 'react';
 import '../assets/style/count.css';
 import '../assets/img/images';
+import TicketCard from '../components/TicketCard';
+import type { TicketData } from '../components/TicketCard';
+
 import { alertSvg, arriveSvg, arrowLeftSvg, arrowRightSvg, boxGoldSvg, cartSvg, departSvg, layerSvg, logoSvg, mailSvg, passSvg, persoWhiteSvg, shielSvg, tickeSvg } from '../assets/img/images';
 
 
 export default function Account() {
   const [userFullName, setUserFullName] = useState('Chargement... ');
   const [userEmail, setUserEmail] = useState('Chargement... ');
+  const [tickets, setTickets] = useState<TicketData[]>([]);
 
   //for checking session
   const [isLoading, setIsLoading] = useState(true);
 
   //function for checking session
-  useEffect(() => {
-    const checkSession = async () => {
-      try{
-        const response = await fetch('http://localhost:8000/api_user.php', {
-          method: 'GET',
-          credentials: 'include'
-        });
+useEffect(() => {
+  const fetchData = async () => {
+    try {
+      // 1. Fetch User Data
+      const userRes = await fetch('http://localhost:8000/api_user.php', { credentials: 'include' });
+      const userData = await userRes.json();
 
-        const data = await response.json();
+      if (userData.status === 'success') {
+        setUserFullName(`${userData.user.prenom} ${userData.user.nom}`);
+        setUserEmail(userData.user.mail);
 
-        if(data.status === 'success'){
-          setUserFullName(`${data.user.prenom} ${data.user.nom}`);
-          setUserEmail(data.user.mail);
-          setIsLoading(false);
-        }else{
-          //session was closed
-          window.location.href = "/login";
+        // 2. Fetch Tickets
+        const ticketsRes = await fetch('http://localhost:8000/api_tickets.php', { credentials: 'include' });
+        const ticketsData = await ticketsRes.json();
+
+        if (ticketsData.status === 'success') {
+          setTickets(ticketsData.tickets);
         }
-      }catch(error){
-        console.error("Error checking session: ", error);
-        window.location.href = '/login';
-      }
-    };
-    checkSession();
-  }, [])
 
+        setIsLoading(false);
+      } else {
+        window.location.href = "/login";
+      }
+    } catch(error) {
+      console.error("Error fetching data: ", error);
+      window.location.href = '/login';
+    }
+  };
+  fetchData();
+}, []);
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const [atStart, setAtStart] = useState(true);
@@ -289,223 +297,19 @@ export default function Account() {
             onMouseMove={handleMouseMove}
             style={{ userSelect: isDragging ? 'none' : 'auto' }}
           >
-
-            {/* BILLET 1 */}
-            <div className="ticket-card">
-              <div className="ticket-header">
-                <div className="ticket-class-tag">1ère</div>
-                <div className="ticket-train-num">
-                  <img src={departSvg} alt="" />
-                  TGV 6601
-                </div>
-                <div className="ticket-route">
-                  <div className="ticket-city">Paris</div>
-                  <div className="ticket-arrow-wrap">
-                    <div className="ticket-arrow-line"></div>
-                    <div className="ticket-dur">1h 55min</div>
-                  </div>
-                  <div className="ticket-city">Lyon</div>
-                </div>
+            {tickets.length === 0 && !isLoading ? (
+              <div style={{ padding: '40px', color: '#8a8f9e', textAlign: 'center', width: '100%', fontSize: '1.1rem' }}>
+                Vous n'avez pas encore de billets.
               </div>
-              <div className="ticket-body">
-                <div className="ticket-punch">
-                  <div className="punch-hole"></div>
-                  <div className="punch-line"></div>
-                  <div className="punch-hole"></div>
-                </div>
-                <div className="ticket-details">
-                  <div><div className="detail-label">Date</div><div className="detail-value">18 mars 2026</div></div>
-                  <div><div className="detail-label">Départ</div><div className="detail-value">06:47</div></div>
-                  <div><div className="detail-label">Voyageur</div><div className="detail-value">J. Dupont</div></div>
-                  <div><div className="detail-label">Siège</div><div className="detail-value">Voiture 4 · 12A</div></div>
-                </div>
-                <div className="ticket-footer">
-                  <span className="ticket-status status-upcoming">● À venir</span>
-                  <span className="ticket-price">89€</span>
-                </div>
-              </div>
-            </div>
-
-            {/* BILLET 2 */}
-            <div className="ticket-card">
-              <div className="ticket-header">
-                <div className="ticket-class-tag">2ème</div>
-                <div className="ticket-train-num">
-                  <img src={departSvg} alt="" />
-                  TGV 6820
-                </div>
-                <div className="ticket-route">
-                  <div className="ticket-city">Paris</div>
-                  <div className="ticket-arrow-wrap">
-                    <div className="ticket-arrow-line"></div>
-                    <div className="ticket-dur">3h 05min</div>
-                  </div>
-                  <div className="ticket-city">Marseille</div>
-                </div>
-              </div>
-              <div className="ticket-body">
-                <div className="ticket-punch">
-                  <div className="punch-hole"></div>
-                  <div className="punch-line"></div>
-                  <div className="punch-hole"></div>
-                </div>
-                <div className="ticket-details">
-                  <div><div className="detail-label">Date</div><div className="detail-value">22 mars 2026</div></div>
-                  <div><div className="detail-label">Départ</div><div className="detail-value">10:15</div></div>
-                  <div><div className="detail-label">Voyageur</div><div className="detail-value">J. Dupont</div></div>
-                  <div><div className="detail-label">Siège</div><div className="detail-value">Voiture 7 · 33B</div></div>
-                </div>
-                <div className="ticket-footer">
-                  <span className="ticket-status status-upcoming">● À venir</span>
-                  <span className="ticket-price">45€</span>
-                </div>
-              </div>
-            </div>
-
-            {/* BILLET 3 */}
-            <div className="ticket-card">
-              <div className="ticket-header">
-                <div className="ticket-class-tag">2ème</div>
-                <div className="ticket-train-num">
-                  <img src={departSvg} alt="" />
-                  TGV 7214
-                </div>
-                <div className="ticket-route">
-                  <div className="ticket-city">Bordeaux</div>
-                  <div className="ticket-arrow-wrap">
-                    <div className="ticket-arrow-line"></div>
-                    <div className="ticket-dur">2h 04min</div>
-                  </div>
-                  <div className="ticket-city">Paris</div>
-                </div>
-              </div>
-              <div className="ticket-body">
-                <div className="ticket-punch">
-                  <div className="punch-hole"></div>
-                  <div className="punch-line"></div>
-                  <div className="punch-hole"></div>
-                </div>
-                <div className="ticket-details">
-                  <div><div className="detail-label">Date</div><div className="detail-value">28 févr. 2026</div></div>
-                  <div><div className="detail-label">Départ</div><div className="detail-value">14:30</div></div>
-                  <div><div className="detail-label">Voyageur</div><div className="detail-value">J. Dupont</div></div>
-                  <div><div className="detail-label">Siège</div><div className="detail-value">Voiture 2 · 08C</div></div>
-                </div>
-                <div className="ticket-footer">
-                  <span className="ticket-status status-used">● Utilisé</span>
-                  <span className="ticket-price">29€</span>
-                </div>
-              </div>
-            </div>
-
-            {/* BILLET 4 */}
-            <div className="ticket-card">
-              <div className="ticket-header">
-                <div className="ticket-class-tag">1ère</div>
-                <div className="ticket-train-num">
-                  <img src={departSvg} alt="" />
-                  TGV 5503
-                </div>
-                <div className="ticket-route">
-                  <div className="ticket-city">Paris</div>
-                  <div className="ticket-arrow-wrap">
-                    <div className="ticket-arrow-line"></div>
-                    <div className="ticket-dur">1h 02min</div>
-                  </div>
-                  <div className="ticket-city">Lille</div>
-                </div>
-              </div>
-              <div className="ticket-body">
-                <div className="ticket-punch">
-                  <div className="punch-hole"></div>
-                  <div className="punch-line"></div>
-                  <div className="punch-hole"></div>
-                </div>
-                <div className="ticket-details">
-                  <div><div className="detail-label">Date</div><div className="detail-value">14 févr. 2026</div></div>
-                  <div><div className="detail-label">Départ</div><div className="detail-value">08:00</div></div>
-                  <div><div className="detail-label">Voyageur</div><div className="detail-value">J. Dupont</div></div>
-                  <div><div className="detail-label">Siège</div><div className="detail-value">Voiture 1 · 02A</div></div>
-                </div>
-                <div className="ticket-footer">
-                  <span className="ticket-status status-used">● Utilisé</span>
-                  <span className="ticket-price">59€</span>
-                </div>
-              </div>
-            </div>
-
-            {/* BILLET 5 */}
-            <div className="ticket-card">
-              <div className="ticket-header">
-                <div className="ticket-class-tag">2ème</div>
-                <div className="ticket-train-num">
-                  <img src={departSvg} alt="" />
-                  TGV 6340
-                </div>
-                <div className="ticket-route">
-                  <div className="ticket-city">Lyon</div>
-                  <div className="ticket-arrow-wrap">
-                    <div className="ticket-arrow-line"></div>
-                    <div className="ticket-dur">1h 45min</div>
-                  </div>
-                  <div className="ticket-city">Nice</div>
-                </div>
-              </div>
-              <div className="ticket-body">
-                <div className="ticket-punch">
-                  <div className="punch-hole"></div>
-                  <div className="punch-line"></div>
-                  <div className="punch-hole"></div>
-                </div>
-                <div className="ticket-details">
-                  <div><div className="detail-label">Date</div><div className="detail-value">05 janv. 2026</div></div>
-                  <div><div className="detail-label">Départ</div><div className="detail-value">11:22</div></div>
-                  <div><div className="detail-label">Voyageur</div><div className="detail-value">J. Dupont</div></div>
-                  <div><div className="detail-label">Siège</div><div className="detail-value">Voiture 5 · 17D</div></div>
-                </div>
-                <div className="ticket-footer">
-                  <span className="ticket-status status-cancelled">● Annulé</span>
-                  <span className="ticket-price">38€</span>
-                </div>
-              </div>
-            </div>
-
-            {/* BILLET 6 */}
-            <div className="ticket-card">
-              <div className="ticket-header">
-                <div className="ticket-class-tag">1ère</div>
-                <div className="ticket-train-num">
-                  <img src={departSvg} alt="" />
-                  TGV 9901
-                </div>
-                <div className="ticket-route">
-                  <div className="ticket-city">Paris</div>
-                  <div className="ticket-arrow-wrap">
-                    <div className="ticket-arrow-line"></div>
-                    <div className="ticket-dur">2h 00min</div>
-                  </div>
-                  <div className="ticket-city">Nantes</div>
-                </div>
-              </div>
-              <div className="ticket-body">
-                <div className="ticket-punch">
-                  <div className="punch-hole"></div>
-                  <div className="punch-line"></div>
-                  <div className="punch-hole"></div>
-                </div>
-                <div className="ticket-details">
-                  <div><div className="detail-label">Date</div><div className="detail-value">30 mars 2026</div></div>
-                  <div><div className="detail-label">Départ</div><div className="detail-value">17:45</div></div>
-                  <div><div className="detail-label">Voyageur</div><div className="detail-value">J. Dupont</div></div>
-                  <div><div className="detail-label">Siège</div><div className="detail-value">Voiture 3 · 21B</div></div>
-                </div>
-                <div className="ticket-footer">
-                  <span className="ticket-status status-upcoming">● À venir</span>
-                  <span className="ticket-price">109€</span>
-                </div>
-              </div>
-            </div>
-
+            ) : (
+              tickets.map((ticket) => (
+                <TicketCard 
+                  key={ticket.id} 
+                  ticket={ticket} 
+                  passengerName={userFullName} 
+                />
+              ))
+            )}
           </div>
 
           <button

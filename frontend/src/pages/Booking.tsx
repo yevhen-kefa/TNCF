@@ -119,6 +119,8 @@ export default function Booking() {
   };
 
   const handleSubmit = async () => {
+
+
     // Validation
     if (!passenger.prenom || !passenger.nom) {
       setMessage({ text: 'Veuillez remplir le prénom et le nom du passager.', type: 'error' });
@@ -156,10 +158,14 @@ export default function Booking() {
       total,
     };
 
+    setIsLoading(true);
+
+
     try {
       const response = await fetch('http://localhost:8000/api_booking.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify(payload),
       });
       const data = await response.json();
