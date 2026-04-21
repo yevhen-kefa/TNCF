@@ -118,14 +118,14 @@ useEffect(() => {
   return (
     <>
       <nav className="topbar">
-        <a href="/" className="brand">
+        <a href="/home" className="brand">
           <div className="brand-logo">
             <img src={logoSvg} alt="Logo TNCF" />
           </div>
         </a>
 
         <ul className="nav-links">
-          <li><a href="/">Voyager</a></li>
+          <li><a href="/home">Voyager</a></li>
           <li><a href="/tickets">Billets</a></li>
           <li><a href="/account" className="active">Compte</a></li>
         </ul>

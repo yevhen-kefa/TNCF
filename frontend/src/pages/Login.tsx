@@ -50,7 +50,7 @@ export default function Login(){
             if(data.status === 'success'){
                 setMessage({text: 'Connextion reussie!', color: '#2d9e6b'});
                 setTimeout(() => {
-                    window.location.href = '/'; // React Router path for home
+                    window.location.href = '/home'; // React Router path for home
                 }, 1500);
             }else{
                 setMessage({text: data.message, color: "#e05252"});
@@ -70,7 +70,7 @@ export default function Login(){
                 <div className="left-content">
                     <div className="brand">
                     <div className="brand-logo">
-                        <a href="/"><img src={logoSvg} alt="" /></a>
+                        <a href="/home"><img src={logoSvg} alt="" /></a>
                     </div>
                     </div>
 

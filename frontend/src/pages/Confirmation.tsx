@@ -89,7 +89,7 @@ export default function Confirmation() {
   return (
     <div className="confirmation-page">
       <div className="topbar">
-        <a href="/" className="brand">
+        <a href="/home" className="brand">
           <div className="brand-logo"><img src={logoSvg} alt="TNCF" /></div>
         </a>
         <div className="topbar-actions">

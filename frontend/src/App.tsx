@@ -9,6 +9,7 @@ import Account from './pages/Account';
 import Booking from './pages/Booking';
 import Confirmation from './pages/Confirmation';
 import Cart from './pages/Cart';
+import Home from './pages/Home'
 import { CartProvider } from './context/CartContext';
 
 
@@ -32,6 +33,9 @@ export default function App() {
                 <Link to="/signup" style={{ padding: '10px 20px', background: '#e05252', color: 'white', textDecoration: 'none', borderRadius: '5px' }}>
                   Teste Signup
                 </Link>
+                <Link to="/home" style={{ padding: '10px 20px', background: '#528be0', color: 'white', textDecoration: 'none', borderRadius: '5px' }}>
+                  Home
+                </Link>
                 <Link to="/tickets" style={{ padding: '10px 20px', background: '#d452e0', color: 'white', textDecoration: 'none', borderRadius: '5px' }}>
                   Teste Tickets
                 </Link>
@@ -48,6 +52,7 @@ export default function App() {
         <Route path="/signup" element={<Signup />} />
         <Route path='/tickets' element={<Tickets/>}/>
         <Route path='/account' element={<Account/>}/>
+        <Route path="/home" element={<Home />} />
         <Route path="/booking" element={<Booking />} />
         <Route path="/confirmation" element={<Confirmation />} />
         <Route path="/cart" element={<Cart />} />

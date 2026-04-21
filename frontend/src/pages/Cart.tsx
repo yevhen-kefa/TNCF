@@ -56,8 +56,40 @@ export default function Cart() {
       const data = await response.json();
 
       if (data.status === 'success') {
-        clearCart();
-        navigate('/account'); 
+        
+        // Take first ticket
+        const firstItem = cartItems[0];
+        
+        // Count time arrive
+        let arrTime = '--:--';
+        if (firstItem?.train?.dep) {
+          const [h, m] = firstItem.train.dep.split(':').map(Number);
+          let durH = 1, durM = 55; 
+          const anyTrain = firstItem.train as any;
+          if (anyTrain?.temps_arriver) {
+             const match = anyTrain.temps_arriver.match(/(\d+)h\s*(\d+)/);
+             if (match) { durH = parseInt(match[1]); durM = parseInt(match[2]); }
+          }
+          const totalM = h * 60 + m + durH * 60 + durM;
+          arrTime = `${Math.floor(totalM / 60) % 24}`.padStart(2, '0') + ':' + `${totalM % 60}`.padStart(2, '0');
+        }
+
+        // Send in the page Confirmation
+        navigate('/confirmation', {
+          state: {
+            booking: {
+              train:       firstItem.train,
+              passenger:   firstItem.passenger,
+              contact:     firstItem.contact,
+              total:       cartTotal, 
+              orderNumber: data.orderNumber,
+              assignedSeat: data.assignedSeats ? data.assignedSeats[0] : { wagon: 2, number: '12A', type: 'standard' }, 
+              arrivalTime: arrTime
+            }
+          }
+        });
+
+        clearCart(); 
         return; 
       } else {
         setMessage({ text: data.message || 'Une erreur est survenue.', type: 'error' });
@@ -73,13 +105,13 @@ export default function Cart() {
     <div className="booking-page">
       {/* ── TOPBAR ── */}
       <div className="topbar">
-        <a href="/" className="brand">
+        <a href="/home" className="brand">
           <div className="brand-logo">
             <img src={logoSvg} alt="TNCF" />
           </div>
         </a>
         <ul className="nav-links">
-            <li><a href="/">Voyager</a></li>
+            <li><a href="/home">Voyager</a></li>
             <li><a href="/tickets">Billets</a></li>
             <li><a href="/account">Compte</a></li>
         </ul>
@@ -134,7 +166,7 @@ export default function Cart() {
                 </div>
               ))}
 
-              {/* 5. PAYMENT */}
+              {/*PAYMENT */}
               <div className="booking-section" style={{ marginTop: '40px' }}>
                 <div className="booking-section-header">
                   <h2>Paiement des réservations (Total : {cartTotal.toFixed(2)}€)</h2>

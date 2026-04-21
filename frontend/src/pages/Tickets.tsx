@@ -203,13 +203,13 @@ export default function Tickets(){
 
             {/* ── TOPBAR ── */}
             <div className="topbar">
-                <a href="/" className="brand">
+                <a href="/home" className="brand">
                 <div className="brand-logo">
                     <img src={logoSvg} alt="TNCF" />
                 </div>
                 </a>
                 <ul className="nav-links">
-                    <li><a href="/">Voyager</a></li>
+                    <li><a href="/home">Voyager</a></li>
                     <li><a href="/tickets" className="active">Billets</a></li>
                     <li><a href="/account">Compte</a></li>
                 </ul>

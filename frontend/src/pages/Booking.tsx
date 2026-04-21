@@ -144,7 +144,7 @@ export default function Booking() {
 
       {/* ── TOPBAR ── */}
       <div className="topbar">
-        <a href="/" className="brand">
+        <a href="/home" className="brand">
           <div className="brand-logo">
             <img src={logoSvg} alt="TNCF" />
           </div>
