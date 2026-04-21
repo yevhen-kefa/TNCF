@@ -1,5 +1,4 @@
 <?php
-// Блокуємо вивід HTML помилок, щоб не ламати JSON
 error_reporting(0);
 ini_set('display_errors', 0);
 ob_start();
@@ -27,7 +26,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 try {
     session_start();
 
-    // Перевіряємо, чи існує файл Database.php
+    // Check if exist Database.php
     $db_path = __DIR__ . '/../src/Config/Database.php';
     if (!file_exists($db_path)) {
         throw new \Exception("Le fichier Database.php est introuvable.");
@@ -83,9 +82,9 @@ try {
     }
     
 } catch (\Throwable $e) {
-    // ВАЖЛИВО: Ловимо АБСОЛЮТНО всі фатальні помилки PHP
+    // Catch any unexpected errors and return a JSON response
     ob_clean();
-    http_response_code(200); // Ставимо 200, щоб браузер не блокував CORS
+    http_response_code(200); // Set status to 200 to prevent CORS issues
     echo json_encode([
         "status" => "error", 
         "message" => "FATAL ERROR: " . $e->getMessage()
