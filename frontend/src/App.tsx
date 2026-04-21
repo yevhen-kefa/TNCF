@@ -8,13 +8,16 @@ import Tickets from './pages/Tickets';
 import Account from './pages/Account';
 import Booking from './pages/Booking';
 import Confirmation from './pages/Confirmation';
+import Cart from './pages/Cart';
+import { CartProvider } from './context/CartContext';
 
 
 
 export default function App() {
   return (
-    <Router>
-      <Routes>
+    <CartProvider>
+      <Router>
+        <Routes>
         {/* Temporary Home route for testing purposes */}
         <Route 
           path="/" 
@@ -47,8 +50,10 @@ export default function App() {
         <Route path='/account' element={<Account/>}/>
         <Route path="/booking" element={<Booking />} />
         <Route path="/confirmation" element={<Confirmation />} />
+        <Route path="/cart" element={<Cart />} />
       </Routes>
     </Router>
+    </CartProvider>
   );
 }
  

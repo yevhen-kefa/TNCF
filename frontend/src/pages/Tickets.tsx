@@ -4,6 +4,7 @@ import type { Voyage } from "../Voyage";
 import type { SelectedTrain } from "../SelectedTrain";
 import TrainCard from "../components/TrainCard";
 import DateStrip, { getMinPriceForDate } from "../components/DateStrip";
+import { useCart } from '../context/CartContext';
 import '../assets/style/ticket.css'
 
 import logoSvg       from '../assets/img/logo.svg';
@@ -39,7 +40,7 @@ const formatTime = (s: number) =>
 export default function Tickets(){
     const [voyages, setVoyages]         = useState<Voyage[]>([]);
     const [selected, setSelected]       = useState<SelectedTrain | null>(null);
-    const [cartAdded, setCartAdded]     = useState<string | null>(null);
+    const { cartItems }                 = useCart();
     const [expandedId, setExpandedId]   = useState<string | null>(null);
     const [timerSec, setTimerSec]       = useState(900);
     const [sessionExp, setSessionExp]   = useState(false);
@@ -172,18 +173,17 @@ export default function Tickets(){
 
     const addToCart = (trainId: string) => {
         if (!selected || selected.trainId !== trainId) return;
-        setCartAdded(trainId);
+        navigate('/booking', { state: { train: selected } });
     };  
     
     
     const removeCart = () => {
         setSelected(null);
-        setCartAdded(null);
     }
 
     const timerStr  = formatTime(timerSec);
     const isUrgent  = timerSec <= 30;
-    const cartCount = cartAdded ? 1 : 0;
+    const cartCount = cartItems.length;
 
     const calcArrival = (dep: string, duration: string): string => {
         const [depH, depM] = dep.split(':').map(Number);
@@ -219,7 +219,7 @@ export default function Tickets(){
                     Session expire dans
                     <span className={`timer-count${isUrgent ? ' urgent' : ''}`}>{timerStr}</span>
                 </div>
-                <a href="#" className="cart-btn">
+                <a href="/cart" className="cart-btn">
                     <img src={boxSvg} alt="" />
                     Panier
                     <span className="cart-count">{cartCount}</span>
@@ -362,7 +362,7 @@ export default function Tickets(){
                                 voyage={v}
                                 isSelected={selected?.trainId === v._id}
                                 selectedClass={selected?.trainId === v._id ? selected.cls : undefined}
-                                isAdded={cartAdded === v._id}
+                                isAdded={cartItems.some(item => item.train.trainId === v._id)}
                                 isExpanded={expandedId === v._id}
                                 onSelectClass={selectClass}
                                 onAddToCart={addToCart}
@@ -388,10 +388,15 @@ export default function Tickets(){
                     </div>
                 </div>
 
-                {!cartAdded || !selected ? (
+                {!selected ? (
                     <div className="cart-empty">
                     <img src={boxGSvg} alt="" />
-                    <p>Sélectionnez un train et une classe pour commencer votre réservation</p>
+                    <p>Sélectionnez un train et une classe pour configurer votre réservation</p>
+                    {cartCount > 0 && (
+                        <button className="btn-checkout" onClick={() => navigate('/cart')} style={{marginTop: '15px'}}>
+                            Voir mon panier ({cartCount})
+                        </button>
+                    )}
                     </div>
                 ) : (
                     <div className="cart-items">
@@ -412,14 +417,13 @@ export default function Tickets(){
 
                         <div className="cart-totals">
                             <div className="total-row"><span>Billet</span><span>{selected.price}€</span></div>
-                            <div className="total-row main"><span>Total</span><span>{selected.price}€</span></div>
                         </div>
 
                         <button
                             className="btn-checkout"
                             onClick={() => navigate('/booking', { state: { train: selected } })}
                             >
-                            Procéder au paiement
+                            Configurer les passagers
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                 <path d="M5 12h14M12 5l7 7-7 7" />
                             </svg>
