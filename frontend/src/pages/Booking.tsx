@@ -1,5 +1,5 @@
-import { useLocation, useNavigate } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useLocation, useNavigate, Link } from "react-router-dom";
+import { useState, useEffect, useRef } from "react";
 
 import type { PassengerForm } from "../PassengerForm";
 import type { ContactForm } from "../ContactForm";
@@ -12,7 +12,8 @@ import '../assets/style/booking.css';
 import '../assets/img/images';
 import { boxSvg, clockSvg, logoSvg, persoWhiteSvg } from "../assets/img/images";
 
-type SeatMode = 'random' | 'specific'; // New type for seat selection mode
+// New type for seat selection mode
+type SeatMode = 'random' | 'specific'; 
 
 interface BaggageOptions {
   extra: number;
@@ -52,6 +53,55 @@ export default function Booking() {
   const [message, setMessage] = useState<{ text: string; type: 'error' | 'success' | '' }>({ text: '', type: '' });
   const [isLoading, setIsLoading] = useState(false);
 
+  // ── User state ──
+  const [user, setUser] = useState<{ prenom: string, nom: string } | null>(null);
+  const [showUserMenu, setShowUserMenu] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  // ── Check session on load ──
+  useEffect(() => {
+    const checkSession = async () => {
+      try {
+        const response = await fetch('http://localhost:8000/api_user.php', { credentials: 'include' });
+        const data = await response.json();
+        if (data.status === 'success') {
+          setUser(data.user);
+        }
+      } catch (error) {
+        console.log("User is not authenticated");
+      }
+    };
+    checkSession();
+  }, []);
+
+  // ── Click outside listener for user menu ──
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Node;
+      if (menuRef.current && !menuRef.current.contains(target)) {
+        setShowUserMenu(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // ── Logout function ──
+  const handleLogout = async () => {
+    try {
+      await fetch('http://localhost:8000/api_logout.php', {
+        method: 'POST',
+        credentials: 'include'
+      });
+      setUser(null);
+      setShowUserMenu(false);
+      navigate('/login');
+    } catch (error) {
+      console.error('Logout error: ', error);
+    }
+  };
+
+  // ── Autofill user data ──
   useEffect(() => {
     const autofillUserData = async () => {
       try {
@@ -62,7 +112,7 @@ export default function Booking() {
         const data = await response.json();
 
         if (data.status === 'success') {
-          // repmlire user
+          // Fill passenger data
           setPassenger(prev => ({
             ...prev,
             civilite: data.user.civilite || 'M',
@@ -71,7 +121,7 @@ export default function Booking() {
             dob: data.user.dob || ''
           }));
           
-          // remplire contacts
+          // Fill contact data
           setContact(prev => ({
             ...prev,
             email: data.user.mail || '',
@@ -79,7 +129,7 @@ export default function Booking() {
           }));
         }
       } catch (error) {
-        console.log("Utilisateur non connecté ou erreur serveur");
+        console.log("User is not authenticated or server error");
       }
     };
 
@@ -108,6 +158,7 @@ export default function Booking() {
   };
 
   const handleSubmit = async () => {
+    // Validation
     if (!passenger.prenom || !passenger.nom) {
       setMessage({ text: 'Veuillez remplir le prénom et le nom du passager.', type: 'error' });
       return;
@@ -125,6 +176,7 @@ export default function Booking() {
       return;
     }
 
+    // Add to cart
     addToCart({
       id: Date.now().toString(),
       train,
@@ -144,21 +196,53 @@ export default function Booking() {
 
       {/* ── TOPBAR ── */}
       <div className="topbar">
-        <a href="/home" className="brand">
+        <Link to="/" className="brand">
           <div className="brand-logo">
             <img src={logoSvg} alt="TNCF" />
           </div>
-        </a>
+        </Link>
+        <ul className="nav-links">
+            <li><Link to="/">Voyager</Link></li>
+            <li><Link to="/tickets">Billets</Link></li>
+            <li><Link to="/account">Compte</Link></li>
+        </ul>
         <div className="topbar-actions">
           <div className="session-timer-top">
             <img src={clockSvg} alt="" />
             Session expire dans
             <span className="timer-count">{timerStr}</span>
           </div>
-          <a href="/login" className="cart-btn">
-            <img src={persoWhiteSvg} alt="" />
-            Connexion
-          </a>
+
+          {/* ── Dynamic Authentication Block ── */}
+          {user ? (
+            <div className="user-menu-container" ref={menuRef}>
+                <button 
+                    className="cart-btn" 
+                    onClick={() => setShowUserMenu(!showUserMenu)}
+                    style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif" }}
+                >
+                    <img src={persoWhiteSvg} alt="" />
+                    {user.prenom} {user.nom}
+                </button>
+
+                {showUserMenu && (
+                    <ul className="user-dropdown-menu" style={{ top: '100%', right: '0', marginTop: '15px' }}>
+                        <li>
+                            <Link to="/account" onClick={() => setShowUserMenu(false)}>Mon profil</Link>
+                        </li>
+                        <li>
+                            <Link to="/edit-profile" onClick={() => setShowUserMenu(false)}>Paramètres</Link>
+                        </li>
+                        <hr />
+                        <li>
+                            <button onClick={handleLogout} style={{ color: '#e05252' }}>Déconnexion</button>
+                        </li>
+                    </ul>
+                )}
+            </div>
+          ) : (
+            <Link to="/login" className="cart-btn"><img src={persoWhiteSvg} alt="" />Connexion</Link>
+          )}
         </div>
       </div>
 
@@ -375,8 +459,6 @@ export default function Booking() {
             </div>
           </div>
 
-  
-
           {/* MESSAGE */}
           {message.text && (
             <div className={`booking-message ${message.type === 'error' ? 'booking-message-error' : 'booking-message-success'}`}>
@@ -441,7 +523,7 @@ export default function Booking() {
         </aside>
 
       </div>
-      {/* MODAL AT THE END */}
+      {/* ── SEAT MAP MODAL ── */}
       <SeatMapModal 
         isOpen={isSeatMapOpen} 
         maxSeats={1}
