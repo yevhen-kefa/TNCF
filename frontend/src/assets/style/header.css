@@ -268,3 +268,52 @@ nav.scrolled {
 .btn-nav-fill:hover {
   background: var(--gold-light);
 }
+
+.user-menu-container {
+  position: relative;
+  display: inline-block;
+}
+
+.user-dropdown-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background: white;
+  border: 1px solid #ede8df;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+  list-style: none;
+  padding: 8px 0;
+  margin: 10px 0 0 0;
+  min-width: 200px;
+  z-index: 999;
+}
+
+.user-dropdown-menu li a,
+.user-dropdown-menu li button {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 12px 20px;
+  color: var(--navy);
+  text-decoration: none;
+  background: none;
+  border: none;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.user-dropdown-menu li:hover a,
+.user-dropdown-menu li:hover button {
+  background: #f5f0e6;
+  color: var(--gold);
+}
+
+.user-dropdown-menu hr {
+  border: 0;
+  border-top: 1px solid #ede8df;
+  margin: 4px 0;
+}

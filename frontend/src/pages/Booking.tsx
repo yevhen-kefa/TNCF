@@ -62,7 +62,7 @@ export default function Booking() {
         const data = await response.json();
 
         if (data.status === 'success') {
-          // Заповнюємо пасажира
+          // repmlire user
           setPassenger(prev => ({
             ...prev,
             civilite: data.user.civilite || 'M',
@@ -71,7 +71,7 @@ export default function Booking() {
             dob: data.user.dob || ''
           }));
           
-          // Заповнюємо контакти
+          // remplire contacts
           setContact(prev => ({
             ...prev,
             email: data.user.mail || '',

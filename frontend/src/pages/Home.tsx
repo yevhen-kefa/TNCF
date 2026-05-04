@@ -1,18 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 
+// Import icons
 import {
-  logoSvg,
-  departSvg,
-  arriveSvg,
-  switcSvg,
-  searcSvg,
-  shielSvg,
-  cartSvg,
-  alertSvg,
-  tickeSvg
+  logoSvg, departSvg, arriveSvg, switcSvg, searcSvg, shielSvg, cartSvg, alertSvg, tickeSvg, persoWhiteSvg
 } from '../assets/img/images';
 
+// Direct imports for images
 import trainSvg from '../assets/img/train/train.svg';
 import parisImg from '../assets/img/cities/paris.jpg';
 import marseilleImg from '../assets/img/cities/marseille.jpg';
@@ -26,18 +20,77 @@ import strasbourgImg from '../assets/img/cities/strasbourg.jpg';
 
 import '../assets/style/index.css';
 
+// ─── ARRAY OF CITIES FOR AUTOCOMPLETE ───
+const AVAILABLE_CITIES = [
+  'Paris', 'Lyon', 'Marseille', 'Bordeaux', 'Nice', 
+  'Lille', 'Rennes', 'Caen', 'Strasbourg', 'Toulouse', 
+  'Nantes', 'Montpellier'
+];
+
 export default function Home() {
   const navigate = useNavigate();
 
   const [isScrolled, setIsScrolled] = useState(true); 
 
+  // ─── USER STATE ───
+  const [user, setUser] = useState<{ prenom: string, nom: string } | null>(null);
+  const [showUserMenu, setShowUserMenu] = useState(false);
+  
+  // Ref for the user dropdown menu to detect outside clicks
+  const menuRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 60);
-    };
+    const handleScroll = () => setIsScrolled(window.scrollY > 60);
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  // ─── CHECK SESSION ON LOAD ───
+  useEffect(() => {
+    const checkSession = async () => {
+      try {
+        const response = await fetch('http://localhost:8000/api_user.php', { credentials: 'include' });
+        const data = await response.json();
+        if (data.status === 'success') {
+          setUser(data.user);
+        }
+      } catch (error) {
+        console.log("User is not authenticated");
+      }
+    };
+    checkSession();
+  }, []);
+
+  // ─── CLICK OUTSIDE LISTENER FOR USER MENU ───
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setShowUserMenu(false);
+      }
+    };
+
+    // Bind the event listener
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      // Unbind the event listener on clean up
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [menuRef]);
+
+  // ─── LOGOUT FUNCTION ───
+  const handleLogout = async () => {
+    try {
+      await fetch('http://localhost:8000/api_logout.php', {
+        method: 'POST',
+        credentials: 'include'
+      });
+      setUser(null);
+      setShowUserMenu(false);
+      navigate('/'); // Reload the main page
+    } catch (error) {
+      console.error('Logout error: ', error);
+    }
+  };
 
   const getTodayDate = () => new Date().toISOString().split('T')[0];
   const getReturnDate = () => {
@@ -47,10 +100,22 @@ export default function Home() {
   };
 
   const [tripType, setTripType] = useState<'aller-simple' | 'aller-retour'>('aller-simple');
-  const [departure, setDeparture] = useState('Paris (Gare de Lyon)');
-  const [arrival, setArrival] = useState('Lyon Part-Dieu');
+  const [departure, setDeparture] = useState('Paris');
+  const [arrival, setArrival] = useState('Lyon');
   const [dateDepart, setDateDepart] = useState(getTodayDate());
   const [dateRetour, setDateRetour] = useState(getReturnDate());
+
+  // ─── DROPDOWN STATES ───
+  const [showDepartDropdown, setShowDepartDropdown] = useState(false);
+  const [showArrivalDropdown, setShowArrivalDropdown] = useState(false);
+
+  // Filter cities based on the entered text
+  const filteredDepartCities = AVAILABLE_CITIES.filter(city => 
+    city.toLowerCase().includes(departure.toLowerCase())
+  );
+  const filteredArrivalCities = AVAILABLE_CITIES.filter(city => 
+    city.toLowerCase().includes(arrival.toLowerCase())
+  );
 
   const handleSwapCities = () => {
     const temp = departure;
@@ -66,20 +131,47 @@ export default function Home() {
     <>
       {/* ── NAV ── */}
       <nav id="navbar" className={isScrolled ? 'scrolled' : ''}>
-        <Link to="/home" className="brand">
+        <Link to="/" className="brand">
           <div className="brand-logo">
             <img src={logoSvg} alt="TNCF" />
           </div>
         </Link>
-
         <ul className="nav-links">
-          <li><Link to="/home" className="nav-link active">Voyager</Link></li>
+          <li><Link to="/" className="nav-link active">Voyager</Link></li>
           <li><Link to="/tickets">Billets</Link></li>
           <li><Link to="/account">Compte</Link></li>
         </ul>
-
+        
+        {/* ── DYNAMIC AUTHENTICATION BLOCK ── */}
         <div className="nav-actions">
-          <Link to="/login" className="btn-nav-outline">Se connecter</Link>
+          {user ? (
+            <div className="user-menu-container" ref={menuRef}>
+              <button 
+                className="btn-nav-outline" 
+                onClick={() => setShowUserMenu(!showUserMenu)}
+                style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}
+              >
+                {user.prenom} {user.nom}
+              </button>
+
+              {showUserMenu && (
+                <ul className="user-dropdown-menu">
+                  <li>
+                    <Link to="/account" onClick={() => setShowUserMenu(false)}>Mon profil</Link>
+                  </li>
+                  <li>
+                    <Link to="/edit-profile" onClick={() => setShowUserMenu(false)}>Paramètres</Link>
+                  </li>
+                  <hr />
+                  <li>
+                    <button onClick={handleLogout} style={{ color: '#e05252' }}>Déconnexion</button>
+                  </li>
+                </ul>
+              )}
+            </div>
+          ) : (
+            <Link to="/login" className="btn-nav-outline">Se connecter</Link>
+          )}
         </div>
       </nav>
 
@@ -89,7 +181,6 @@ export default function Home() {
         <div className="hero-glow"></div>
         <div className="hero-rail"></div>
 
-        {/* animated mini-train */}
         <div className="hero-train">
           <img src={trainSvg} alt="TGV Train" style={{ height: '150px', width: 'auto' }} />
         </div>
@@ -122,38 +213,60 @@ export default function Home() {
             <div className="search-field" style={{ position: 'relative' }}>
               <label>Départ</label>
               <div className="search-field-inner">
-                <span className="search-icon">
-                  <img src={departSvg} alt="depart" />
-                </span>
+                <span className="search-icon"><img src={departSvg} alt="depart" /></span>
                 <input 
                   type="text" 
                   placeholder="Ville ou gare" 
                   value={departure}
                   onChange={(e) => setDeparture(e.target.value)}
+                  onFocus={() => setShowDepartDropdown(true)}
+                  onBlur={() => setTimeout(() => setShowDepartDropdown(false), 200)} 
                 />
               </div>
+              
+              {/* Départ dropdown list */}
+              {showDepartDropdown && filteredDepartCities.length > 0 && (
+                <ul className="city-dropdown">
+                  {filteredDepartCities.map((city, idx) => (
+                    <li key={idx} onClick={() => { setDeparture(city); setShowDepartDropdown(false); }}>
+                      {city}
+                    </li>
+                  ))}
+                </ul>
+              )}
+
               <button className="swap-btn" onClick={handleSwapCities}>
                 <img src={switcSvg} alt="swap" />
               </button>
             </div>
 
             {/* Arrivée */}
-            <div className="search-field">
+            <div className="search-field" style={{ position: 'relative' }}>
               <label>Arrivée</label>
               <div className="search-field-inner">
-                <span className="search-icon">
-                  <img src={arriveSvg} alt="arrive" style={{ height: '17px' }} />
-                </span>
+                <span className="search-icon"><img src={arriveSvg} alt="arrive" style={{ height: '17px' }} /></span>
                 <input 
                   type="text" 
                   placeholder="Ville ou gare" 
                   value={arrival}
                   onChange={(e) => setArrival(e.target.value)}
+                  onFocus={() => setShowArrivalDropdown(true)}
+                  onBlur={() => setTimeout(() => setShowArrivalDropdown(false), 200)}
                 />
               </div>
+
+              {/* Arrivée dropdown list */}
+              {showArrivalDropdown && filteredArrivalCities.length > 0 && (
+                <ul className="city-dropdown">
+                  {filteredArrivalCities.map((city, idx) => (
+                    <li key={idx} onClick={() => { setArrival(city); setShowArrivalDropdown(false); }}>
+                      {city}
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
 
-            {/* Date Départ */}
             <div className="search-field">
               <label>Départ</label>
               <div className="search-field-inner">
@@ -165,7 +278,6 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Date Retour */}
             <div 
               className="search-field" 
               id="retour-field"
@@ -185,7 +297,6 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Submit Button */}
             <div>
               <button className="btn-search" onClick={handleSearch}>
                 <img src={searcSvg} alt="search" />
@@ -216,7 +327,7 @@ export default function Home() {
             { city: 'Caen', img: caenImg, bgClass: 'bg-lyon' },
             { city: 'Strasbourg', img: strasbourgImg, bgClass: 'bg-lyon' }
           ].map((route, idx) => (
-            <Link to="/tickets" className="route-card" key={idx}>
+            <div key={idx} onClick={() => { setArrival(route.city); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="route-card" style={{cursor: 'pointer'}}>
               <div className="route-img">
                 <div className={`route-img-bg ${route.bgClass}`}>
                   <img src={route.img} alt={route.city} />
@@ -228,7 +339,7 @@ export default function Home() {
                   <span className="route-city">{route.city}</span>
                 </div>
               </div>
-            </Link>
+            </div>
           ))}
         </div>
       </section>
@@ -268,6 +379,20 @@ export default function Home() {
             </div>
             <div className="feature-title">Billet Mobile</div>
             <p className="feature-text">Votre billet directement sur votre smartphone — sans impression requise.</p>
+          </div>
+        </div>
+      </section>
+
+      {/* ── PROMO BANNER ── */}
+      <section className="section">
+        <div className="promo-banner">
+          <div className="promo-text">
+            <div className="promo-eyebrow">Offre limitée — Semaine du voyageur</div>
+            <div className="promo-title">Jusqu'à -40% sur<br />les billets Weekend</div>
+            <p className="promo-sub">Valable pour les voyages du vendredi au dimanche. Offre valable jusqu'au 31 mars 2026.</p>
+          </div>
+          <div className="promo-action">
+            <Link to="/tickets" className="btn-promo">Profiter de l'offre →</Link>
           </div>
         </div>
       </section>

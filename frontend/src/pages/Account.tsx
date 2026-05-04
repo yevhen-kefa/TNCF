@@ -187,90 +187,9 @@ useEffect(() => {
           </div>
 
           {/* Bouton modifier */}
-          <a href="#" className="btn-edit">
+          <a href="/modif" className="btn-edit">
             <img src={persoWhiteSvg} alt="" />
             Modifier le profil
-          </a>
-        </div>
-
-        {/* GRILLE DU MENU COMPTE */}
-        <div className="account-grid">
-          <a href="#" className="account-menu-card">
-            <div className="menu-card-icon">
-              <img src={tickeSvg} alt="" />
-            </div>
-            <div className="menu-card-text">
-              <h4>Mes Réservations</h4>
-              <p>Consulter et gérer vos billets</p>
-            </div>
-            <span className="menu-card-arrow">
-              <img src={arriveSvg} alt="→" />
-            </span>
-          </a>
-
-          <a href="#" className="account-menu-card">
-            <div className="menu-card-icon">
-              <img src={cartSvg} alt="" />
-            </div>
-            <div className="menu-card-text">
-              <h4>Moyens de paiement</h4>
-              <p>Cartes bancaires enregistrées</p>
-            </div>
-            <span className="menu-card-arrow">
-              <img src={arriveSvg} alt="→" />
-            </span>
-          </a>
-
-          <a href="#" className="account-menu-card">
-            <div className="menu-card-icon">
-              <img src={boxGoldSvg} alt="" />
-            </div>
-            <div className="menu-card-text">
-              <h4>Mes avantages</h4>
-              <p>Codes promo et réductions</p>
-            </div>
-            <span className="menu-card-arrow">
-              <img src={arriveSvg} alt="→" />
-            </span>
-          </a>
-
-          <a href="#" className="account-menu-card">
-            <div className="menu-card-icon">
-              <img src={alertSvg} alt="" />
-            </div>
-            <div className="menu-card-text">
-              <h4>Alertes &amp; Notifications</h4>
-              <p>SMS et e-mails de suivi</p>
-            </div>
-            <span className="menu-card-arrow">
-              <img src={arriveSvg} alt="→" />
-            </span>
-          </a>
-
-          <a href="#" className="account-menu-card">
-            <div className="menu-card-icon">
-              <img src={shielSvg} alt="" />
-            </div>
-            <div className="menu-card-text">
-              <h4>Sécurité</h4>
-              <p>Mot de passe et authentification</p>
-            </div>
-            <span className="menu-card-arrow">
-              <img src={arriveSvg} alt="→" />
-            </span>
-          </a>
-
-          <a href="#" className="account-menu-card">
-            <div className="menu-card-icon">
-              <img src={layerSvg} alt="" />
-            </div>
-            <div className="menu-card-text">
-              <h4>Paramètres</h4>
-              <p>Langue, accessibilité, données</p>
-            </div>
-            <span className="menu-card-arrow">
-              <img src={arriveSvg} alt="→" />
-            </span>
           </a>
         </div>
 

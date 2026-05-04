@@ -11,6 +11,8 @@ import Confirmation from './pages/Confirmation';
 import Cart from './pages/Cart';
 import Home from './pages/Home'
 import { CartProvider } from './context/CartContext';
+import ForgotPassword from './pages/ForgotPassword';
+import EditProfile from './pages/EditProfile';
 
 
 
@@ -56,6 +58,9 @@ export default function App() {
         <Route path="/booking" element={<Booking />} />
         <Route path="/confirmation" element={<Confirmation />} />
         <Route path="/cart" element={<Cart />} />
+        <Route path="/forgot" element={<ForgotPassword />} />
+        <Route path="/modif" element={<EditProfile/>}/>
+
       </Routes>
     </Router>
     </CartProvider>

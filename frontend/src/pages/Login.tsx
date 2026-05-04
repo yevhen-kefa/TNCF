@@ -136,7 +136,7 @@ export default function Login(){
                             <input className="form-input" type="password" id="password" placeholder="••••••••" value={pass} onChange={(e) => setPass(e.target.value)} />
                         </div>
                         {/* WE NEED DO PAGE "Mot de passe oublie" */}
-                        <a href="#" className="forgot-link">Mot de passe oublié ?</a>
+                        <a href="forgot" className="forgot-link">Mot de passe oublié ?</a>
                         </div>
 
                         {message.text && (
