@@ -10,7 +10,3 @@ backend/vendor/
 
 *.txt
 *.doc
-
-
-Dckerfile
-docker-compose.yml
