@@ -200,12 +200,12 @@ export default function Home() {
             >
               Aller simple
             </button>
-            <button 
+            {/* <button 
               className={`search-tab ${tripType === 'aller-retour' ? 'active' : ''}`}
               onClick={() => setTripType('aller-retour')}
             >
               Aller-retour
-            </button>
+            </button> */}
           </div>
 
           <div className="search-fields">
@@ -278,7 +278,7 @@ export default function Home() {
               </div>
             </div>
 
-            <div 
+            {/* <div 
               className="search-field" 
               id="retour-field"
               style={{
@@ -295,7 +295,7 @@ export default function Home() {
                   disabled={tripType === 'aller-simple'}
                 />
               </div>
-            </div>
+            </div> */}
 
             <div>
               <button className="btn-search" onClick={handleSearch}>
