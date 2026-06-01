@@ -422,12 +422,12 @@ export default function Tickets() {
                         </div>
                     </div>
                     <div className="sp-divider"></div>
-                    <div className="spf">
+                    {/* <div className="spf">
                         <div className="spf-inner">
                             <div className="spf-lbl">Retour</div>
                             <div className="spf-val"><input type="date" defaultValue={dayAfter} /></div>
                         </div>
-                    </div>
+                    </div> */}
                     <div className="spf narrow">
                         <span className="spf-icon"><img src={personWhite} alt="" /></span>
                         <div className="spf-inner">
