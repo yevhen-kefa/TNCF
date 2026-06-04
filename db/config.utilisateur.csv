@@ -1,2 +1,6 @@
-_id,nom,prenom,mail,telephone,mdp,abonner
-69ac6d86f76fd20653c6415c,matheo,lariviere,matheo.lariviere2111@gmail.com,108652446,fauxmdp,07/03/2026
+_id,nom,prenom,mail,telephone,pass,abonner
+6a1c000000000000000000a1,dupont,jean,jean.dupont@gmail.com,0612345678,$2b$10$Zt8VsO4RfARq0fB83g2Oc.qA.Ywh.3uSU/3H5omJlYXd0swiJ/Yj.,
+6a1c000000000000000000a2,martin,marie,marie.martin@gmail.com,0623456789,$2b$10$4X/Jz/v0GIFZHhXbJZZ7T.fFfRFSl0UV5PFaHb25g4MgpQ50DJ1s.,
+6a1c000000000000000000a3,bernard,pierre,pierre.bernard@yahoo.fr,0634567890,$2b$10$cBjehnspieWPBfOAfo3QjOMRPsuHQ14NHSLQSk91BPyhSz1q9Uzou,
+6a1c000000000000000000a4,leroy,sophie,sophie.leroy@gmail.com,0645678901,$2b$10$bh6it0KlSn.N/xxPJhkzIerZm.53LQDEOL89d3fiMqkC7YE20z2Q.,
+6a1c000000000000000000a5,moreau,lucas,lucas.moreau@outlook.fr,0656789012,$2b$10$/o8fMA7Z5fwvmnOZwBadce.PU/EwYOLJTV5pAw7B25HJ7q6c1Kra2,

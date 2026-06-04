@@ -4,8 +4,9 @@ services:
     ports:
       - "27018:27017"
     volumes:
-      - mongo_data:/data/db
-
+      - mongo_data:/data/db  # fixed: underscore to match the volumes section
+      - ./db:/docker-entrypoint-initdb.d/
+  
   backend:
     build:
       context: .
@@ -32,4 +33,4 @@ services:
             - node_modules
 
 volumes:
-  mongo_data:
+  mongo_data:  # declared here, used above

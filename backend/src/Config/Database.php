@@ -10,7 +10,7 @@ class Database {
         try {
             $this->manager = new \MongoDB\Driver\Manager("mongodb://db:27017");
         } catch (\MongoDB\Driver\Exception\Exception $e) {
-            die("Помилка підключення до MongoDB: " . $e->getMessage());
+            die("Error connection : " . $e->getMessage());
         }
     }
 
