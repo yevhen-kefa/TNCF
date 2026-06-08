@@ -171,7 +171,10 @@ export default function Tickets() {
             setIsLoading(true);
             setVoyages([]);
 
-            const proxyUrl = "http://yevhensrv.alwaysdata.net/navitia.php";
+            // Mock local servi par le backend (format Navitia identique).
+            // L'ancien proxy externe (yevhensrv.alwaysdata.net) est hors service ;
+            // repasser dessus une fois la clé API SNCF/Navitia obtenue.
+            const proxyUrl = "http://localhost:8000/navitia.php";
             const fromId   = getCityId(departureCity, "admin:fr:75056");
             const toId     = getCityId(arrivalCity,   "admin:fr:69123");
 
