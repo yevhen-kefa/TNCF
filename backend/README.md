@@ -26,6 +26,7 @@ Le service est exposé sur <http://localhost:8000> (port `80` du conteneur).
 backend/
 ├── public/                 # DocumentRoot Apache
 │   ├── index.php           # Page d'accueil
+│   ├── navitia.php         # Mock local de l'API Navitia (recherche de trains)
 │   ├── api_*.php           # Points d'entrée de l'API
 │   ├── .htaccess           # Réécriture d'URL
 │   ├── style/              # CSS
@@ -54,6 +55,21 @@ Les scripts `api_*.php` autorisent les requêtes du frontend
 (`http://localhost:3000`) avec `Access-Control-Allow-Credentials: true`. Les
 sessions PHP servent à identifier l'utilisateur connecté ; le frontend envoie
 donc ses requêtes avec `credentials: 'include'`.
+
+## Recherche de trains (mock Navitia)
+
+La recherche de trajets s'appuie sur l'API **Navitia** (OpenData SNCF). Le proxy
+externe d'origine étant hors service, [`public/navitia.php`](public/navitia.php)
+fournit un **mock local** renvoyant des trajets TGV au **format Navitia exact**
+(`{ "journeys": [ { "departure_date_time", "duration", "sections" } ] }`). Le
+frontend l'appelle sur `http://localhost:8000/navitia.php`, sans adaptation du
+parsing.
+
+Le mock accepte les mêmes paramètres que l'appel d'origine (`from`, `to`,
+`datetime`, `min_nb_journeys`) et génère des trajets déterministes par
+itinéraire. La marche à suivre pour brancher la **vraie API** (clé gratuite
+[navitia.io](https://navitia.io/), auth Basic, variable `NAVITIA_TOKEN`) est
+documentée en commentaire en bas du fichier.
 
 ## Dépendances PHP
 
