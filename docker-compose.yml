@@ -13,10 +13,14 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8000:80"
-    volumes:
-      - ./backend:/var/www/html
     depends_on:
       - db
+    develop:
+      watch:
+        - action: sync
+          path: ./backend
+          target: /var/www/html
+    
 
   frontend:
     build:

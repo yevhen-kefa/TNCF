@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
 
 import '../assets/img/images';
- import '../assets/style/singup.css'; 
+import '../assets/style/singup.css'; 
 import type { FormData } from '../FormData';
 import { cartSvg, layerSvg, logoSvg, mailGSvg, mailSvg, passSvg, persoSvg } from '../assets/img/images';
-
 
 interface FormMessage {
   text: string;
@@ -32,27 +31,20 @@ export default function Signup() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [pwdStrength, setPwdStrength] = useState<PwdStrength>({ score: 0, label: 'Entrez un mot de passe' });
 
-  // TYPE THE EVENT OBJECT (React.ChangeEvent<HTMLInputElement>)
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, name, value, type } = e.target;
     const fieldName = type === 'radio' ? name : id;
     
     setFormData((prev) => ({
       ...prev,
-      [fieldName as keyof FormData]: value // Tell TS that fieldName is a valid key of FormData
+      [fieldName as keyof FormData]: value
     }));
 
-
-
-    // If password field changes, check strength
     if (id === 'pwd') {
       checkStrength(value);
     }
   };
 
-
-
-  // Visual password strength indicator logic
   const checkStrength = (val: string) => {
     if (!val) {
       setPwdStrength({ score: 0, label: 'Entrez un mot de passe' });
@@ -69,14 +61,9 @@ export default function Signup() {
     setPwdStrength({ score, label: labels[score] || 'Trop court' });
   };
 
-
-
-
-  //TYPE THE MOUSE EVENT FOR THE BUTTON
   const handleSubmit = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
 
-    // Basic validation
     if (!formData.prenom || !formData.nom || !formData.telephone || !formData.email || !formData.pwd) {
       setMessage({ text: 'Veuillez remplir tous les champs obligatoires.', type: 'error' });
       return;
@@ -94,7 +81,6 @@ export default function Signup() {
 
     setIsLoading(true);
 
-    // Prepare payload
     const payload = {
       civilite: formData.civilite,
       prenom: formData.prenom,
@@ -105,7 +91,6 @@ export default function Signup() {
     };
 
     try {
-      // Connect to PHP Backend running on port 8000
       const response = await fetch('http://localhost:8000/api_register.php', {
         method: 'POST',
         headers: {
@@ -119,7 +104,6 @@ export default function Signup() {
       if (data.status === 'success') {
         setMessage({ text: 'Compte créé avec succès ! Redirection...', type: 'success' });
         
-        // Redirect to login after 2 seconds
         setTimeout(() => {
           window.location.href = '/login'; 
         }, 2000);
@@ -133,8 +117,6 @@ export default function Signup() {
       setIsLoading(false);
     }
   };
-
-  // Helper arrays for password strength UI
 
   const strengthClasses = ['', 'weak', 'medium', 'strong', 'strong'];
   const activeClass = strengthClasses[pwdStrength.score] || '';

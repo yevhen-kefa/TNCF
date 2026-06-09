@@ -88,22 +88,41 @@ try {
         $assignedSeats[] = $assignedSeat;
 
         // Convert voyage string ID to ObjectId
-        $id_voyage = $train['_id'] ?? null;
+        $id_voyage = $train['_id'] ?? $train['trainId'] ?? null;
         $voyage_id_obj = null;
-        if ($id_voyage && strlen($id_voyage) === 24) {
-            $voyage_id_obj = new \MongoDB\BSON\ObjectId($id_voyage);
+
+        if ($id_voyage) {
+            // Try to convert to ObjectId only if it's a valid 24-char hex string
+            if (strlen($id_voyage) === 24 && ctype_xdigit($id_voyage)) {
+                try {
+                    $voyage_id_obj = new \MongoDB\BSON\ObjectId($id_voyage);
+                } catch (\Exception $e) {
+                    // Not a valid ObjectId — keep as string
+                    $voyage_id_obj = null;
+                }
+            }
         }
 
         // Prepare ticket document
         $newTicket = [
-            'id_voyage' => $voyage_id_obj ?? $id_voyage,
-            'id_uti' => $user_id_obj ?? $id_uti,
-            'option' => $seatMode === 'specific' ? 'choisie' : 'aleatoire',
-            'wagon' => (string) $assignedSeat['wagon'],
-            'place' => (string) $assignedSeat['number'],
-            'orderNumber' => $orderNumber, 
-            'prix_paye' => $item['total'] ?? 0,
-            'date_achat' => new \MongoDB\BSON\UTCDateTime()
+            'id_voyage'   => $voyage_id_obj ?? $id_voyage,
+            'id_uti'      => $user_id_obj ?? $id_uti,
+            'option'      => $seatMode === 'specific' ? 'choisie' : 'aleatoire',
+            'wagon'       => (string) $assignedSeat['wagon'],
+            'place'       => (string) $assignedSeat['number'],
+            'orderNumber' => $orderNumber,
+            'prix_paye'   => $item['total'] ?? 0,
+            'date_achat'  => new \MongoDB\BSON\UTCDateTime(),
+            // Save train snapshot directly in billet for offline display
+            // Save train snapshot directly in billet for offline display
+            'train_snapshot' => [
+                'depart'       => $train['from']          ?? $train['depart']       ?? null,
+                'arriver'      => $train['to']            ?? $train['arriver']      ?? null,
+                'heure_depart' => $train['dep']           ?? $train['heure_depart'] ?? null,
+                'numero_train' => $train['num']           ?? $train['numero_train'] ?? null,
+                'duree'        => $train['temps_arriver'] ?? $train['duree']        ?? null,
+                'date_depart'  => $train['date']          ?? $train['date_depart']  ?? null, // now will work
+            ],
         ];
 
         // Add to bulk operation

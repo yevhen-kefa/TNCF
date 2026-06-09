@@ -95,14 +95,15 @@ export default function Confirmation() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          orderNumber,
-          passenger: booking?.passenger,
-          contact:   booking?.contact,
-          train:     booking?.train,
-          total:     booking?.total,
-          assignedSeat, 
-          arrivalTime
-        }),
+        orderNumber,
+        passenger: booking?.passenger,
+        contact:   booking?.contact,
+        train:     booking?.train,    
+        total:     booking?.total,
+        assignedSeat,
+        arrivalTime,
+        travelDate: booking?.train?.date ?? '', 
+      }),
       });
 
       // Check if response is OK

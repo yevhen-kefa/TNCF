@@ -294,7 +294,16 @@ export default function Tickets() {
 
     const selectClass = (v: Voyage, cls: '1' | '2') => {
         const price = cls === '1' ? Math.round(v.prix * 2.2) : v.prix;
-        setSelected({ trainId: v._id, cls, price, num: v.num ?? `TGV INOUI`, dep: v.date_depart, from: v.depart, to: v.arriver });
+        setSelected({ 
+            trainId: v._id, 
+            cls, 
+            price, 
+            num: v.num ?? 'TGV INOUI', 
+            dep: v.date_depart, 
+            from: v.depart, 
+            to: v.arriver,
+            date: searchDate
+        });
     };
 
     const addToCart  = (trainId: string) => {
